@@ -41,8 +41,6 @@
             :rows="rows"
             row-key="name"
             style="height:100%"
-            virtual-scroll
-            :pagination="{ rowsPerPage: 0 }"
           />
         </div>
       </div>
@@ -105,7 +103,7 @@ function onFileDelete() {
   selectedFiles.value.clear()
 }
 
-const columns = ref<TableColumn[]>(DataRecord048.columns())
+const columns = ref<TableColumn[]>(new DataRecord048().columns())
 const rows = computed(() => fileStore.files.map(file => file.dataRecords).flat())
 
 </script>

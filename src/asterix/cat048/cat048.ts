@@ -1,3 +1,4 @@
+import { y } from 'app/dist/electron/UnPackaged/assets/index.053df2f5';
 import { DataRecord, TableColumn } from '../model';
 import { checkFX, octalToDecimal } from '../util';
 import { GarbledtoString, ValidatedtoString } from './code';
@@ -35,7 +36,7 @@ export class DataRecord048 implements DataRecord {
   flightLevelGarbled?: boolean;
   flightLevel?: number;
 
-  static columns(): TableColumn[] {
+  columns(): TableColumn[] {
     return [
       { name: "sac", label: "SAC", field: "sac" },
       { name: "sic", label: "SIC", field: "sic" },

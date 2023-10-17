@@ -1,4 +1,3 @@
-import { DataRecord048 } from './cat048/cat048'
 import Cat048Decoder from './cat048/decoder'
 import { DataRecord } from './model'
 
