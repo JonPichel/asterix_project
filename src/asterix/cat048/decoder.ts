@@ -1,4 +1,4 @@
-import { checkFX, octalToDecimal } from "../util"
+import { checkFX, octalToDecimal, twosComplement } from "../util"
 import { DataRecord048 } from "./cat048"
 
 const Cat048Decoder = {
@@ -32,9 +32,13 @@ const Cat048Decoder = {
           fieldStart += parse090(record, dataFieldsBuffer.slice(fieldStart))
           break
         case 7:
+          fieldStart += parse130(record, dataFieldsBuffer.slice(fieldStart))
+          break
         case 8:
         case 9:
         case 10:
+          fieldStart += parse250(record, dataFieldsBuffer.slice(fieldStart))
+          break
         case 11:
         case 12:
         case 13:
@@ -125,4 +129,133 @@ function parse090(record: DataRecord048, buffer: Uint8Array): number {
   record.flightLevel = (((buffer[0] & 0b111111) << 8) | buffer[1]) * 0.25 // FL
 
   return 2
+}
+
+function parse130(record: DataRecord048, buffer: Uint8Array): number {
+  const resultFX = checkFX(buffer)
+  if (resultFX.fieldLength !== 1) {
+    throw Error("Bad length")
+  }
+
+  let fieldStart = 1
+  for (const subfrn of resultFX.positions) {
+    switch (subfrn) {
+      case 1:
+        record.radarPlotSRL = buffer[fieldStart] * 360 / 8192
+        fieldStart++
+        break
+      case 2:
+        record.radarPlotSRR = buffer[fieldStart]
+        fieldStart++
+        break
+      case 3:
+        record.radarPlotSAM = twosComplement(buffer[fieldStart], 8)
+        fieldStart++
+        break
+      case 4:
+        record.radarPlotPRL = buffer[fieldStart] * 360 / 8192
+        fieldStart++
+        break
+      case 5:
+        record.radarPlotPAM = twosComplement(buffer[fieldStart], 8)
+        fieldStart++
+        break
+      case 6:
+        record.radarPlotRPD = buffer[fieldStart] / 256
+        fieldStart++
+        break
+      case 7:
+        record.radarPlotAPD = buffer[fieldStart] * 360 / 16384
+        fieldStart++
+        break
+      default:
+        throw Error('Malformed category 48 data record')
+    }
+  }
+
+  return resultFX.fieldLength + (fieldStart - 1)
+}
+
+function parse250(record: DataRecord048, buffer: Uint8Array): number {
+  const n = buffer[0]
+  const bds = []
+  for (let i = 0; i < n; i++) {
+    const data = buffer.slice(1 + 8 * n, 1 + 8 * (n + 1) - 1)
+    const bds1 = buffer[1 + 8*n - 1] >> 4
+    const bds2 = buffer[1 + 8*n - 1] & 0b1111
+    bds.push(buffer[1 + 8*n - 1])
+    if (bds2 == 0) {
+      if (bds1 == 4) {
+        if ((data[0] >> 7 & 0b1) === 1) {
+          // XAAAAAAA BBBBBXXX
+          // 0AAAA AAA00000
+          //       000BBBBB
+          // 0AAAA AAABBBBB
+          record.bds40MCPFCUSelectedAltitude = (((data[0] & 0b01111111) << 5) | (data[1] >> 3)) * 16 // ft
+        }
+        if ((data[1] >> 2 & 0b1) === 1) {
+          // XXXXXXAA BBBBBBBB CCXXXXXX
+          // 00 0000AA00 00000000
+          //          BB BBBBBB00
+          //             000000CC
+          // 00 0000AABB BBBBBBCC
+          record.bds40FMSSelectedAltitude = ((data[1] & 0b11) << 10) | (data[2] << 2) | (data[3] >> 6) * 16 // ft
+        }
+        if ((data[3] >> 5 & 0b1) === 1) {
+          // XXXAAAAA BBBBBBB0
+          // 000AAAAA A0000000
+          //          0BBBBBBB
+          // 000AAAAA ABBBBBBB
+          record.bds40BarometricPressureSetting = (((data[3] & 0b11111) << 7) | (data[4] >> 1)) * 0.1 // mb
+        }
+        if ((data[5] & 0b1) === 1) {
+          record.bds40MCPFCUMode = data[6] >> 5
+        }
+        if ((data[6] >> 2 & 0b1) === 1) {
+          record.bds40TargetAltSource = data[6] & 0b11
+        }
+      } else if (bds1 == 5) {
+        if ((data[0] >> 7 & 0b1) === 1) {
+          const sign = (data[0] >> 6 & 0b1) === 1 ? -1 : 1
+          record.bds50Roll = sign * (((data[0] & 0b111111) << 3) | (data[1] >> 5)) * 45 / 256 // º
+        }
+        if ((data[1] >> 4 & 0b1) === 1) {
+          const sign = (data[1] >> 3 & 0b1) === 1 ? -1 : 1
+          record.bds50TrueTrack =  sign * (((data[1] & 0b111) << 7) | (data[2] >> 1)) * 90 / 512 // º
+        }
+        if ((data[2] & 0b1) === 1) {
+          record.bds50GS = ((data[3] << 2) | (data[4] >> 6)) * 1024 / 512 // kt
+        }
+        if ((data[4] >> 5 & 0b1) === 1) {
+          const sign = (data[4] >> 4 & 0b1) === 1 ? -1 : 1
+          record.bds50TrackRate = sign * (((data[4] & 0b1111) << 5) | (data[5] >> 3)) * 8 / 256 // º/s
+        }
+        if ((data[5] >> 2 & 0b1) === 1) {
+          record.bds50TAS = (((data[5] & 0b11) << 8) | data[6]) * 2 // kt
+        }
+      } else if (bds1 == 6) {
+        if ((data[0] >> 7 & 0b1) === 1) {
+          const sign = (data[0] >> 6 & 0b1) === 1 ? -1 : 1
+          record.bds60MagneticHeading = sign * (((data[0] & 0b111111) << 4) | (data[1] >> 4)) * 90 / 512 // º
+        }
+        if ((data[1] >> 3 & 0b1) === 1) {
+          record.bds60IAS =  ((data[1] & 0b111) << 7) | (data[2] >> 1) // kt
+        }
+        if ((data[2] & 0b1) === 1) {
+          record.bds60MACH = ((data[3] << 2) | (data[4] >> 6)) * 2.048 / 512 // MACH
+        }
+        if ((data[4] >> 5 & 0b1) === 1) {
+          const sign = (data[4] >> 4 & 0b1) === 1 ? -1 : 1
+          record.bds60BarometricAltitudeRate = sign * (((data[4] & 0b1111) << 5) | (data[5] >> 3)) * 8192 / 256 // ft/min
+        }
+        if ((data[5] >> 2 & 0b1) === 1) {
+          const sign = (data[5] >> 1 & 0b1) === 1 ? -1 : 1
+          record.bds60InertialVerticalVelocity = sign * (((data[5] & 0b1) << 8) | data[6]) * 8192 / 256 // ft/min
+        }
+      }
+    }
+  }
+
+  record.bds = bds
+  return 1 + 8 * n
 }

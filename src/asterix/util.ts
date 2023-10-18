@@ -34,3 +34,13 @@ export function octalToDecimal(octal: number, numDigits: number): number {
   }
   return decimal
 }
+
+export function twosComplement(value: number, numBits: number): number {
+  if ((value >> (numBits - 1)) === 1) {
+    // Negative value
+    return ~value + 1
+  } else {
+    // Positive value
+    return value
+  }
+}

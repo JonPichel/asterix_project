@@ -2,7 +2,7 @@
   <q-page>
     <q-dialog v-model="loadedFilesDialog">
       <div class="dialog-content row bg-red">
-        <div class="col-auto bg-blue" style="width:200px; max-width:50%">
+        <div class="col-auto bg-blue" style="width:600px; max-width:50%">
           <div class="column" style="height: 100%">
             <div class="col" style="width: 100%">
               <q-scroll-area style="height: 100%">

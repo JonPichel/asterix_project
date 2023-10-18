@@ -3,6 +3,7 @@ import { DataRecord, TableColumn } from '../model';
 import { checkFX, octalToDecimal } from '../util';
 import { GarbledtoString, ValidatedtoString } from './code';
 import * as TargetReport from './target-report'
+import * as BDS from './bds'
 
 export class DataRecord048 implements DataRecord {
   category = 48;
@@ -35,6 +36,31 @@ export class DataRecord048 implements DataRecord {
   flightLevelValidated?: boolean;
   flightLevelGarbled?: boolean;
   flightLevel?: number;
+  // I048/130
+  radarPlotSRL?: number;
+  radarPlotSRR?: number;
+  radarPlotSAM?: number;
+  radarPlotPRL?: number;
+  radarPlotPAM?: number;
+  radarPlotRPD?: number;
+  radarPlotAPD?: number;
+  // I048/250
+  bds?: number[];
+  bds40MCPFCUSelectedAltitude?: number;
+  bds40FMSSelectedAltitude?: number;
+  bds40BarometricPressureSetting?: number;
+  bds40MCPFCUMode?: BDS.MCPFCUMode;
+  bds40TargetAltSource?: BDS.TargetAltSource;
+  bds50Roll?: number;
+  bds50TrueTrack?: number;
+  bds50GS?: number;
+  bds50TrackRate?: number;
+  bds50TAS?: number;
+  bds60MagneticHeading?: number;
+  bds60IAS?: number;
+  bds60MACH?: number;
+  bds60BarometricAltitudeRate?: number;
+  bds60InertialVerticalVelocity?: number;
 
   columns(): TableColumn[] {
     return [
