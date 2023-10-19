@@ -1,6 +1,4 @@
-import { y } from 'app/dist/electron/UnPackaged/assets/index.053df2f5';
 import { DataRecord, TableColumn } from '../model';
-import { checkFX, octalToDecimal } from '../util';
 import { GarbledtoString, ValidatedtoString } from './code';
 import * as TargetReport from './target-report'
 import * as BDS from './bds'

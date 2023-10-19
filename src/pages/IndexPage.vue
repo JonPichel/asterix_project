@@ -1,8 +1,9 @@
 <template>
   <q-page>
+    <EsriMap></EsriMap>
     <q-dialog v-model="loadedFilesDialog">
       <div class="dialog-content row bg-red">
-        <div class="col-auto bg-blue" style="width:600px; max-width:50%">
+        <div class="col-auto bg-blue" style="width:300px; max-width:50%">
           <div class="column" style="height: 100%">
             <div class="col" style="width: 100%">
               <q-scroll-area style="height: 100%">
@@ -53,6 +54,7 @@ import { computed, ref } from 'vue'
 import { useFileStore } from 'stores/file-store'
 import { AsterixFile, TableColumn, DataRecord } from 'src/asterix/model'
 import { DataRecord048 } from 'src/asterix/cat048/cat048'
+import EsriMap from 'src/components/EsriMap.vue'
 
 const fileStore = useFileStore()
 
@@ -110,9 +112,9 @@ const rows = computed(() => fileStore.files.map(file => file.dataRecords).flat()
 
 <style scoped>
 .dialog-content {
-  width: 700px;
+  width: 2000;
   max-width: 80vw;
-  height: 400px;
+  height: 1200px;
   max-height: 80vh;
 }
 </style>
