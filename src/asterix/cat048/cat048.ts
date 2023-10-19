@@ -42,6 +42,11 @@ export class DataRecord048 implements DataRecord {
   radarPlotPAM?: number;
   radarPlotRPD?: number;
   radarPlotAPD?: number;
+  //I048/220
+  aircraftaddress?: number; 
+  //I048/240
+  aircraftid?: string;
+
   // I048/250
   bds?: number[];
   bds40MCPFCUSelectedAltitude?: number;
@@ -59,6 +64,24 @@ export class DataRecord048 implements DataRecord {
   bds60MACH?: number;
   bds60BarometricAltitudeRate?: number;
   bds60InertialVerticalVelocity?: number;
+  //I048/161
+  tracknumber?:number;
+  //I048/042
+  Xcomponent?:number;
+  Ycomponent?:number;
+  //I048/200
+  calculatedgroundspeed?: number;
+  calculatedheading?:number;
+  //I048/170
+  targetcnf?: boolean;
+  targetrad?: TargetReport.Typsensor;
+  targetdou?: boolean;
+  targetmah?: boolean;
+  targetcdm?: TargetReport.typClimbingMode;
+  tre?: boolean;
+  gho?: boolean;
+  sup?: boolean;
+  tcc?: boolean;
 
   columns(): TableColumn[] {
     return [
@@ -83,6 +106,19 @@ export class DataRecord048 implements DataRecord {
       { name: "flv", label: "Flight Level V", field: (row: DataRecord) => ValidatedtoString((row as DataRecord048).flightLevelValidated) },
       { name: "flg", label: "Flight Level G", field: (row: DataRecord) => GarbledtoString((row as DataRecord048).flightLevelGarbled) },
       { name: "fl", label: "Flight Level", field: "flightLevel" },
+      {name: "aircraftaddress", label:"Aircraft Address", field:"aircraftaddress"},
+      {name: "tracknumber", label:"Track Number", field:"tracknumber"},
+      { name: "cnf", label: "Confirmed vs Tentative track", field: (row: DataRecord) =>  TargetReport.ConfirmedTentavitoString((row as DataRecord048).targetcnf)},
+      { name: "rad", label: "Type of sensors maintaining track", field: (row: DataRecord) =>  TargetReport.TypsensortoString((row as DataRecord048).targetrad)},
+      { name: "dou", label: "Signal level of confidence n plot to track", field: (row: DataRecord) =>  TargetReport.SignalsLevelsConfidencetoString((row as DataRecord048).targetdou)},
+      { name: "mah", label: "Manoeuvre detection in Horizontal Sense", field: (row: DataRecord) =>  TargetReport.ManoeuvreDetectiontoString((row as DataRecord048).targetmah)},
+      { name: "cdm", label: "Climbing descending Mode", field: (row: DataRecord) =>  TargetReport.ClimbingDescendingtoString((row as DataRecord048).targetcdm)},
+      { name: "tre", label: "Signal for end of track", field: (row: DataRecord) =>  TargetReport.TREtoString((row as DataRecord048).tre)},
+      { name: "gho", label: "Ghost vs true target", field: (row: DataRecord) =>  TargetReport.GHOtoString((row as DataRecord048).gho)},
+      { name: "sup", label: "SUP", field: (row: DataRecord) =>  TargetReport.SUPtoString((row as DataRecord048).sup)},
+      { name: "tcc", label: "Type of plot coordinate transformation mechanism", field: (row: DataRecord) =>  TargetReport.TCCtoString((row as DataRecord048).tcc)},
+      { name: "Xcomponent", label: "X-Component", field: "Xcomponent"},
+      { name: "Ycomponent", label: "Y-Component", field: "Ycomponent"}
     ]
   }
 
