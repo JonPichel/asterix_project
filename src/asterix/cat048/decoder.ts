@@ -1,5 +1,5 @@
-import { checkFX, octalToDecimal, twosComplement } from "../util"
-import { DataRecord048 } from "./cat048"
+import { checkFX, octalToDecimal, twosComplement } from '../util'
+import { DataRecord048 } from './cat048'
 
 const Cat048Decoder = {
   decode(buffer: Uint8Array): DataRecord048 {
@@ -44,7 +44,10 @@ const Cat048Decoder = {
         case 13:
         case 14:
         case 19:
+          fieldStart += parse110(record, dataFieldsBuffer.slice(fieldStart))
         case 21:
+          fieldStart += parse230(record, dataFieldsBuffer.slice(fieldStart))
+          break
         case 27:
         case 28:
           // FIELDS WE WILL IMPLEMENT
@@ -134,7 +137,7 @@ function parse090(record: DataRecord048, buffer: Uint8Array): number {
 function parse130(record: DataRecord048, buffer: Uint8Array): number {
   const resultFX = checkFX(buffer)
   if (resultFX.fieldLength !== 1) {
-    throw Error("Bad length")
+    throw Error('Bad length')
   }
 
   let fieldStart = 1
@@ -258,4 +261,25 @@ function parse250(record: DataRecord048, buffer: Uint8Array): number {
 
   record.bds = bds
   return 1 + 8 * n
+}
+
+function parse110(record: DataRecord048, buffer: Uint8Array): number {
+  record.h3D = twosComplement((buffer[0]<<8) | (buffer[1]), 14)*25;
+
+  return 2
+}
+
+function parse230(record: DataRecord048, buffer: Uint8Array): number {
+  record.ccfCOM = buffer[0]>>5
+  //const binaryString = buffer[0].toString(2).padStart(8, '0');
+  //console.log('Byte en binario:', binaryString);
+  //console.log('COM:', buffer[0]>>5);
+  record.ccfSTAT = (buffer[0] >> 2 & 0b111)
+  record.ccfSI = (buffer[0] >> 1 & 0b1) === 1
+  record.ccfMSSC = (buffer[1] >> 7) === 1
+  record.ccfARC = (buffer[1] >> 6 & 0b1) === 1
+  record.ccfAIC = (buffer[1] >> 5 & 0b1) === 1
+  //......
+
+  return 2
 }
