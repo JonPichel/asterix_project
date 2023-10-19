@@ -16,7 +16,7 @@ export enum MCPFCUMode {
 }
 
 export function MCPFCUModetoString(value?: MCPFCUMode): string {
-  if (value === null || value === undefined) return 'N/A'
+  if (value === null || value === undefined) return ''
 
   switch (value) {
     case MCPFCUMode.None:
@@ -46,7 +46,7 @@ export enum TargetAltSource {
 }
 
 export function TargetAltSourcetoString(value?: TargetAltSource): string {
-  if (value === null || value === undefined) return 'N/A'
+  if (value === null || value === undefined) return ''
 
   switch (value) {
     case TargetAltSource.Unknown:

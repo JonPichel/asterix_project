@@ -18,7 +18,7 @@ type CartesianCoords = {
 
 function getRadarCoords(sac: number, sic: number): GPSCoords {
   if (sac == 0x14 && sic == 0x81) {
-    return { lat: 41.3007023, lon: 2.1020588, alt: 2 + 25.25 }
+    return { lat: 41.3007023, lon: 2.1020588, alt: 2.007 + 25.25 }
   } else {
     throw Error("Unknown radar")
   }
