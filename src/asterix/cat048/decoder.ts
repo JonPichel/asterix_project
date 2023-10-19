@@ -35,11 +35,15 @@ const Cat048Decoder = {
           fieldStart += parse130(record, dataFieldsBuffer.slice(fieldStart))
           break
         case 8:
+          /*fieldStart += parse220(record, dataFieldsBuffer.slice(fieldStart))
+          break*/
         case 9:
         case 10:
           fieldStart += parse250(record, dataFieldsBuffer.slice(fieldStart))
           break
         case 11:
+          fieldStart += parse161(record, dataFieldsBuffer.slice(fieldStart))
+          break
         case 12:
         case 13:
         case 14:
@@ -174,6 +178,18 @@ function parse130(record: DataRecord048, buffer: Uint8Array): number {
   }
 
   return resultFX.fieldLength + (fieldStart - 1)
+}
+
+/*function parse220(record: DataRecord048, buffer: Uint8Array): string {
+  record.aircraftaddress= octalTo    buffer[0];
+  return buffer[0]
+
+}*/
+
+function parse161(record: DataRecord048, buffer: Uint8Array): number {
+  record.tracknumber = octalToDecimal(((buffer[0] & 0b1111) << 8) | buffer[1], 4)
+  return 2
+
 }
 
 function parse250(record: DataRecord048, buffer: Uint8Array): number {

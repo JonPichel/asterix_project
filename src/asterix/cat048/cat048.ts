@@ -44,6 +44,8 @@ export class DataRecord048 implements DataRecord {
   radarPlotPAM?: number;
   radarPlotRPD?: number;
   radarPlotAPD?: number;
+  //I048/220
+  aircraftaddress?: number; 
   // I048/250
   bds?: number[];
   bds40MCPFCUSelectedAltitude?: number;
@@ -61,6 +63,8 @@ export class DataRecord048 implements DataRecord {
   bds60MACH?: number;
   bds60BarometricAltitudeRate?: number;
   bds60InertialVerticalVelocity?: number;
+  //I048/161
+  tracknumber?:number;
 
   columns(): TableColumn[] {
     return [
@@ -85,6 +89,8 @@ export class DataRecord048 implements DataRecord {
       { name: "flv", label: "Flight Level V", field: (row: DataRecord) => ValidatedtoString((row as DataRecord048).flightLevelValidated) },
       { name: "flg", label: "Flight Level G", field: (row: DataRecord) => GarbledtoString((row as DataRecord048).flightLevelGarbled) },
       { name: "fl", label: "Flight Level", field: "flightLevel" },
+      {name: "aircraftaddress", label:"Aircraft Address", field:"aircraftaddress"},
+      {name: "tracknumber", label:"Track Number", field:"tracknumber"}
     ]
   }
 
