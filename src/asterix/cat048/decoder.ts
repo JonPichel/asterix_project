@@ -35,9 +35,11 @@ const Cat048Decoder = {
           fieldStart += parse130(record, dataFieldsBuffer.slice(fieldStart))
           break
         case 8:
-          /*fieldStart += parse220(record, dataFieldsBuffer.slice(fieldStart))
-          break*/
+          fieldStart += parse220(record, dataFieldsBuffer.slice(fieldStart))
+          break
         case 9:
+          fieldStart += parse240(record, dataFieldsBuffer.slice(fieldStart))
+        break
         case 10:
           fieldStart += parse250(record, dataFieldsBuffer.slice(fieldStart))
           break
@@ -45,8 +47,14 @@ const Cat048Decoder = {
           fieldStart += parse161(record, dataFieldsBuffer.slice(fieldStart))
           break
         case 12:
+          fieldStart += parse042(record, dataFieldsBuffer.slice(fieldStart))
+          break
         case 13:
+          fieldStart += parse200(record, dataFieldsBuffer.slice(fieldStart))
+          break
         case 14:
+          fieldStart += parse170(record, dataFieldsBuffer.slice(fieldStart))
+          break
         case 19:
         case 21:
         case 27:
@@ -180,14 +188,22 @@ function parse130(record: DataRecord048, buffer: Uint8Array): number {
   return resultFX.fieldLength + (fieldStart - 1)
 }
 
-/*function parse220(record: DataRecord048, buffer: Uint8Array): string {
-  record.aircraftaddress= octalTo    buffer[0];
-  return buffer[0]
+//DUDA da solo numeros y deberesa dar combinacion de letras y numeros
+function parse220(record: DataRecord048, buffer: Uint8Array): number {
+  record.aircraftaddress= ((buffer[0] << 16) | (buffer[1] << 8) | buffer[2])
+  return 3
 
-}*/
+}
+function parse240(record: DataRecord048,buffer: Uint8Array): number {
+  const bufferString = new TextDecoder('utf-8').decode(buffer)
+  // DUDA: symbol table equal to base64?
+  record.aircraftid = btoa(bufferString)
+  return 6
+
+}
 
 function parse161(record: DataRecord048, buffer: Uint8Array): number {
-  record.tracknumber = octalToDecimal(((buffer[0] & 0b1111) << 8) | buffer[1], 4)
+  record.tracknumber = ((buffer[0] & 0b1111) << 8 | buffer[1])
   return 2
 
 }
@@ -274,4 +290,36 @@ function parse250(record: DataRecord048, buffer: Uint8Array): number {
 
   record.bds = bds
   return 1 + 8 * n
+}
+function parse042(record: DataRecord048, buffer: Uint8Array): number {
+  record.Xcomponent = twosComplement(buffer[0] << 8 | buffer[1],16)* 1 / 128
+  record.Ycomponent = twosComplement(buffer[2] << 8 | buffer[3],16)* 1 / 128
+  return 4
+}
+function parse200(record: DataRecord048, buffer: Uint8Array): number{
+  record.calculatedgroundspeed = buffer[0] << 8 | buffer[1]* 0.22
+  record.calculatedheading = buffer[2] << 8 | buffer[3]* (360/65536)
+  return 4
+
+}
+//DUDA: da peor algunos campos girados
+function parse170(record: DataRecord048, buffer: Uint8Array): number {
+  const resultFX = checkFX(buffer)
+
+  record.targetcnf = (buffer[0] >> 7 & 0b1) == 1
+  record.targetrad = (buffer[0] >> 6) & 0b11
+  record.targetdou = (buffer[0] >> 4 & 0b1) == 1
+  record.targetmah = (buffer[0] >> 3 & 0b1) == 1
+  record.targetcdm = (buffer[0] >> 2) & 0b11
+  
+  if (resultFX.fieldLength > 1) {
+    record.tre = (buffer[1] >> 7 & 0b1) == 1
+    record.gho = (buffer[1] >> 6 & 0b1) == 1
+    record.sup = (buffer[1] >> 5 & 0b1) == 1
+    record.tcc = (buffer[1] >> 4 & 0b1) == 1
+    
+  }
+
+  return resultFX.fieldLength
+
 }
