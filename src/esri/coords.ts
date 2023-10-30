@@ -1,19 +1,19 @@
 type GPSCoords = {
-  lat: number;
-  lon: number;
-  alt: number;
+  lat: number
+  lon: number
+  alt: number
 }
 
 type PolarCoords = {
-  rho: number;
-  theta: number;
-  z: number;
+  rho: number
+  theta: number
+  z: number
 }
 
 type CartesianCoords = {
-  x: number;
-  y: number;
-  z: number;
+  x: number
+  y: number
+  z: number
 }
 
 function getRadarCoords(sac: number, sic: number): GPSCoords {
@@ -26,25 +26,28 @@ function getRadarCoords(sac: number, sic: number): GPSCoords {
 
 export function polarToGPS(origin: GPSCoords, polar: PolarCoords): GPSCoords {
   return origin
-
 }
 
 class Matrix {
-  private rows: number;
-  private cols: number;
-  private values: number[][];
+  private rows: number
+  private cols: number
+  private values: number[][]
 
   constructor(rows: number, cols: number, values?: number[][]) {
     if (values === null || values === undefined) {
       this.rows = rows
       this.cols = cols
-      this.values = Array.from({ length: this.rows }, () => Array(this.cols).fill(0))
+      this.values = Array.from({ length: this.rows }, () =>
+        Array(this.cols).fill(0)
+      )
       return
     }
-    if (values.length !== rows) throw Error("Bad matrix dimensions (number of rows)")
+    if (values.length !== rows)
+      throw Error("Bad matrix dimensions (number of rows)")
 
     for (const row of values) {
-      if (row.length !== cols) throw Error("Bad matrix dimensions (number of cols)")
+      if (row.length !== cols)
+        throw Error("Bad matrix dimensions (number of cols)")
     }
 
     this.rows = rows
@@ -53,11 +56,9 @@ class Matrix {
   }
 
   transpose(): Matrix {
-    let transposed = new Matrix(this.cols, this.rows, this.values)
-    for (let i = 0; i < this.rows; i++)
-    {
-      for (let j = 0; j < this.cols; j++)
-      {
+    const transposed = new Matrix(this.cols, this.rows, this.values)
+    for (let i = 0; i < this.rows; i++) {
+      for (let j = 0; j < this.cols; j++) {
         transposed.values[j][i] = this.values[i][j]
       }
     }
@@ -80,20 +81,85 @@ class Matrix {
 
     return result
   }
+
+  add(other: Matrix): Matrix {
+    if (this.rows != other.rows || this.cols != other.cols) {
+      throw Error("Incompatible dimensions for matrix addition")
+    }
+
+    const result = new Matrix(this.rows, this.cols, this.values)
+    for (let i = 0; i < this.rows; i++) {
+      for (let j = 0; j < this.cols; j++) {
+        result.values[i][j] += other.values[i][j]
+      }
+    }
+
+    return result
+  }
+
+  get(row: number, col: number): number {
+    return this.values[row][col]
+  }
 }
+
 export class RadarPosition {
-  private rotationMatrix: number[][]; 
-  private translationMatrix: number[][]; 
-  coords: GPSCoords; 
+  private rotationMatrix: Matrix
+  private translationMatrix: Matrix
+  coords: GPSCoords
 
   constructor(coords: GPSCoords) {
-    this.rotationMatrix = []
-    this.translationMatrix = []
     this.coords = coords
+    this.rotationMatrix = this.getRotationMatrix()
+    this.translationMatrix = this.getTranslationMatrix()
+  }
+
+  getRotationMatrix() {
+    const lat = (this.coords.lat * Math.PI) / 180.0
+    const lon = (this.coords.lon * Math.PI) / 180.0
+
+    return new Matrix(3, 3, [
+      [-Math.sin(lon), Math.cos(lon), 0],
+      [
+        -Math.sin(lat) * Math.cos(lon),
+        -Math.sin(lat) * Math.sin(lon),
+        Math.cos(lat),
+      ],
+      [
+        Math.cos(lat) * Math.cos(lon),
+        Math.cos(lat) * Math.sin(lon),
+        Math.sin(lat),
+      ],
+    ])
+  }
+
+  getTranslationMatrix() {
+    const a = 6378137
+    const e2 = 0.00669437999013
+    const lat = (this.coords.lat * Math.PI) / 180.0
+    const lon = (this.coords.lon * Math.PI) / 180.0
+    const alt = this.coords.alt
+    const nu = a / Math.sqrt(1 - e2 * Math.pow(Math.sin(lat), 2))
+
+    return new Matrix(3, 1, [
+      [(nu + alt) * Math.cos(lat) * Math.cos(lon)],
+      [(nu + alt) * Math.cos(lat) * Math.sin(lon)],
+      [(nu * (1 - e2) + alt) * Math.sin(lat)],
+    ])
   }
 
   cartesianToGPS(cartesian: CartesianCoords): GPSCoords {
-    return this.coords
+    const inputMatrix = new Matrix(3, 1, [
+      [cartesian.x, cartesian.y, cartesian.z],
+    ])
+    const outputMatrix = this.rotationMatrix
+      .transpose()
+      .multiply(inputMatrix)
+      .add(this.translationMatrix)
+    return {
+      lat: outputMatrix.get(0, 0),
+      lon: outputMatrix.get(1, 0),
+      alt: outputMatrix.get(2, 0),
+    }
   }
 }
 /*
