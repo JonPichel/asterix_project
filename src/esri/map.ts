@@ -1,29 +1,29 @@
-import EsriMap from '@arcgis/core/Map'
-import SceneView from '@arcgis/core/views/SceneView'
-import SpatialReference from '@arcgis/core/geometry/SpatialReference'
-import Track from '@arcgis/core/widgets/Track'
-import type Layer from '@arcgis/core/layers/Layer'
+import EsriMap from "@arcgis/core/Map"
+import SceneView from "@arcgis/core/views/SceneView"
+import SpatialReference from "@arcgis/core/geometry/SpatialReference"
+import Track from "@arcgis/core/widgets/Track"
+import type Layer from "@arcgis/core/layers/Layer"
 
-import { RADAR_BCN } from './locations'
+import { RADAR_BCN } from "./locations"
 
 // Load style
-import '@arcgis/core/assets/esri/themes/dark/main.css'
+import "@arcgis/core/assets/esri/themes/dark/main.css"
 
 export let map: EsriMap
 export let view: SceneView
 
 export const SPATIAL_REFERENCE = new SpatialReference({
-  wkid: 102100
+  wkid: 102100,
 })
 
 export function createMap() {
   map = new EsriMap({
-    basemap: 'satellite',
-    ground: 'world-elevation'
+    basemap: "satellite",
+    ground: "world-elevation",
   })
 
   view = new SceneView({
-    container: 'viewDiv',
+    container: "viewDiv",
     map: map,
     spatialReference: SPATIAL_REFERENCE,
     camera: RADAR_BCN,
