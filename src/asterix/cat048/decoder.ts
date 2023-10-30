@@ -1,4 +1,5 @@
 import { checkFX, octalToDecimal, twosComplement } from '../util'
+import { processID } from './aircraftID'
 import { DataRecord048 } from './cat048'
 
 const Cat048Decoder = {
@@ -193,14 +194,12 @@ function parse130(record: DataRecord048, buffer: Uint8Array): number {
 
 //DUDA da solo numeros y deberesa dar combinacion de letras y numeros
 function parse220(record: DataRecord048, buffer: Uint8Array): number {
-  record.aircraftaddress= ((buffer[0] << 16) | (buffer[1] << 8) | buffer[2]).toString()
+  record.aircraftaddress= ((buffer[0] << 16) | (buffer[1] << 8) | buffer[2]).toString(16).padStart(6, '0').toUpperCase();
   return 3
 }
 
 function parse240(record: DataRecord048,buffer: Uint8Array): number {
-  const bufferString = new TextDecoder('utf-8').decode(buffer.slice(0, 6))
-  // DUDA: symbol table equal to base64?
-  record.aircraftid = btoa(unescape(encodeURIComponent(bufferString)))
+  record.aircraftid = processID(buffer)
   return 6
 
 }
