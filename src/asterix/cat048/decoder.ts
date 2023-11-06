@@ -121,8 +121,10 @@ function parse020(record: DataRecord048, buffer: Uint8Array): number {
 }
 
 function parse040(record: DataRecord048, buffer: Uint8Array): number {
-  record.rho = ((buffer[0] << 8) | buffer[1]) * 1 / 256 // nautical miles
-  record.theta = ((buffer[2] << 8) | buffer[3]) * 360 / 65536 // degrees
+  const auxrho = ((buffer[0] << 8) | buffer[1]) * 1 / 256 // nautical miles
+  record.rho = +auxrho.toFixed(4)
+  const auxtheta = ((buffer[2] << 8) | buffer[3]) * 360 / 65536 // degrees
+  record.theta = +auxtheta.toFixed(4)
 
   return 4
 }
@@ -132,7 +134,8 @@ function parse070(record: DataRecord048, buffer: Uint8Array): number {
   record.mode3AGarbled = (buffer[0] >> 6 & 0b1) == 1
   if ((buffer[0] >> 5 & 0b1) == 0) {
     // Code derived from the reply of the transponder
-    record.mode3ACode = octalToDecimal(((buffer[0] & 0b1111) << 8) | buffer[1], 4)
+    record.mode3ACode = octalToDecimal(((buffer[0] & 0b1111) << 8) | buffer[1], 4);
+    
   }
   // Else code is not present so we don't set it
 
@@ -214,12 +217,17 @@ function parse250(record: DataRecord048, buffer: Uint8Array): number {
   const n = buffer[0]
   const bds = []
   for (let i = 0; i < n; i++) {
-    const data = buffer.slice(1 + 8 * n, 1 + 8 * (n + 1) - 1)
-    const bds1 = buffer[1 + 8*n - 1] >> 4
-    const bds2 = buffer[1 + 8*n - 1] & 0b1111
-    bds.push(buffer[1 + 8*n - 1])
+   const data = buffer.slice(1 + 8 * i, 1 + 8 * (i + 1)-2)
+   const bds1 = buffer[1 + 8*(i+1) - 1] >> 4
+   const bds2 = buffer[1 + 8*(i+1) - 1] & 0b1111
+   /*
+   console.log('Empeiza aqui',data)
+   console.log(bds1)
+   console.log(bds2)
+   */
     if (bds2 == 0) {
       if (bds1 == 4) {
+        bds.push('BDS 4.0 ')
         if ((data[0] >> 7 & 0b1) === 1) {
           // XAAAAAAA BBBBBXXX
           // 0AAAA AAA00000
@@ -240,7 +248,7 @@ function parse250(record: DataRecord048, buffer: Uint8Array): number {
           // 000AAAAA A0000000
           //          0BBBBBBB
           // 000AAAAA ABBBBBBB
-          record.bds40BarometricPressureSetting = (((data[3] & 0b11111) << 7) | (data[4] >> 1)) * 0.1 // mb
+          record.bds40BarometricPressureSetting = +((((data[3] & 0b11111) << 7) | (data[4] >> 1)) * 0.1).toFixed(3) // mb
         }
         if ((data[5] & 0b1) === 1) {
           record.bds40MCPFCUMode = data[6] >> 5
@@ -249,13 +257,14 @@ function parse250(record: DataRecord048, buffer: Uint8Array): number {
           record.bds40TargetAltSource = data[6] & 0b11
         }
       } else if (bds1 == 5) {
+        bds.push('BDS 5.0 ')
         if ((data[0] >> 7 & 0b1) === 1) {
           const sign = (data[0] >> 6 & 0b1) === 1 ? -1 : 1
           record.bds50Roll = sign * (((data[0] & 0b111111) << 3) | (data[1] >> 5)) * 45 / 256 // º
         }
         if ((data[1] >> 4 & 0b1) === 1) {
           const sign = (data[1] >> 3 & 0b1) === 1 ? -1 : 1
-          record.bds50TrueTrack =  sign * (((data[1] & 0b111) << 7) | (data[2] >> 1)) * 90 / 512 // º
+          record.bds50TrueTrack =  +(sign * (((data[1] & 0b111) << 7) | (data[2] >> 1)) * 90 / 512).toFixed(3) // º
         }
         if ((data[2] & 0b1) === 1) {
           record.bds50GS = ((data[3] << 2) | (data[4] >> 6)) * 1024 / 512 // kt
@@ -268,9 +277,10 @@ function parse250(record: DataRecord048, buffer: Uint8Array): number {
           record.bds50TAS = (((data[5] & 0b11) << 8) | data[6]) * 2 // kt
         }
       } else if (bds1 == 6) {
+        bds.push('BDS 6.0')
         if ((data[0] >> 7 & 0b1) === 1) {
           const sign = (data[0] >> 6 & 0b1) === 1 ? -1 : 1
-          record.bds60MagneticHeading = sign * (((data[0] & 0b111111) << 4) | (data[1] >> 4)) * 90 / 512 // º
+          record.bds60MagneticHeading = +(sign * (((data[0] & 0b111111) << 4) | (data[1] >> 4)) * 90 / 512).toFixed(3) // º
         }
         if ((data[1] >> 3 & 0b1) === 1) {
           record.bds60IAS =  ((data[1] & 0b111) << 7) | (data[2] >> 1) // kt
@@ -315,7 +325,7 @@ function parse170(record: DataRecord048, buffer: Uint8Array): number {
   record.targetrad = (buffer[0] >> 6) & 0b11
   record.targetdou = (buffer[0] >> 4 & 0b1) == 1
   record.targetmah = (buffer[0] >> 3 & 0b1) == 1
-  record.targetcdm = (buffer[0] >> 2) & 0b11
+  record.targetcdm = (buffer[0] >> 1) & 0b11
   
   if (resultFX.fieldLength > 1) {
     record.tre = (buffer[1] >> 7 & 0b1) == 1
@@ -336,9 +346,6 @@ function parse110(record: DataRecord048, buffer: Uint8Array): number {
 
 function parse230(record: DataRecord048, buffer: Uint8Array): number {
   record.ccfCOM = buffer[0]>>5
-  //const binaryString = buffer[0].toString(2).padStart(8, '0');
-  //console.log('Byte en binario:', binaryString);
-  //console.log('COM:', buffer[0]>>5);
   record.ccfSTAT = (buffer[0] >> 2 & 0b111)
   record.ccfSI = (buffer[0] >> 1 & 0b1) === 1
   record.ccfMSSC = (buffer[1] >> 7) === 1
