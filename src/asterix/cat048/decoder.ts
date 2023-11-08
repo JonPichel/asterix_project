@@ -260,27 +260,53 @@ function parse250(record: DataRecord048, buffer: Uint8Array): number {
         bds.push('BDS 5.0 ')
         if ((data[0] >> 7 & 0b1) === 1) {
           const sign = (data[0] >> 6 & 0b1) === 1 ? -1 : 1
-          record.bds50Roll = sign * (((data[0] & 0b111111) << 3) | (data[1] >> 5)) * 45 / 256 // º
+          if(sign == -1){
+            record.bds50Roll = +(sign*(90-(((data[0] & 0b111111) << 3) | (data[1] >> 5)) * 45 / 256)).toFixed(3) // º
+          }
+          else{
+            record.bds50Roll = +(sign * (((data[0] & 0b111111) << 3) | (data[1] >> 5)) * 45 / 256).toFixed(3) // º
+          }
+          
         }
         if ((data[1] >> 4 & 0b1) === 1) {
+          // XXXXXAAA BBBBBBBX
+          // AAA0000000 0BBBBBBB
+          // AAA0000000 
+          //   0BBBBBBB
           const sign = (data[1] >> 3 & 0b1) === 1 ? -1 : 1
-          record.bds50TrueTrack =  +(sign * (((data[1] & 0b111) << 7) | (data[2] >> 1)) * 90 / 512).toFixed(3) // º
+          if(sign == -1){
+            record.bds50TrueTrack =  +(sign *(180 - (((data[1] & 0b111) << 7) | (data[2] >> 1)) * 90 / 512)).toFixed(3) // º
+          }
+          else{
+            record.bds50TrueTrack =  +(sign * (((data[1] & 0b111) << 7) | (data[2] >> 1)) * 90 / 512).toFixed(3) // º
+          }
+          
         }
         if ((data[2] & 0b1) === 1) {
           record.bds50GS = ((data[3] << 2) | (data[4] >> 6)) * 1024 / 512 // kt
         }
         if ((data[4] >> 5 & 0b1) === 1) {
           const sign = (data[4] >> 4 & 0b1) === 1 ? -1 : 1
-          record.bds50TrackRate = sign * (((data[4] & 0b1111) << 5) | (data[5] >> 3)) * 8 / 256 // º/s
+          if(sign == -1){
+            record.bds50TrackRate = +(sign * (16-(((data[4] & 0b1111) << 5) | (data[5] >> 3)) * 8 / 256)).toFixed(3) // º/s
+          }
+          else{
+            record.bds50TrackRate = +(sign * (((data[4] & 0b1111) << 5) | (data[5] >> 3)) * 8 / 256).toFixed(3) // º/s
+          }
         }
-        if ((data[5] >> 2 & 0b1) === 1) {
+        if ((data[5] >> 2 & 0b1) === 1) { //MAAAL
           record.bds50TAS = (((data[5] & 0b11) << 8) | data[6]) * 2 // kt
         }
       } else if (bds1 == 6) {
         bds.push('BDS 6.0')
         if ((data[0] >> 7 & 0b1) === 1) {
           const sign = (data[0] >> 6 & 0b1) === 1 ? -1 : 1
-          record.bds60MagneticHeading = +(sign * (((data[0] & 0b111111) << 4) | (data[1] >> 4)) * 90 / 512).toFixed(3) // º
+          if(sign == -1){
+            record.bds60MagneticHeading = +(sign * (180-(((data[0] & 0b111111) << 4) | (data[1] >> 4)) * 90 / 512)).toFixed(3) // º
+          }
+          else{
+            record.bds60MagneticHeading = +((((data[0] & 0b111111) << 4) | (data[1] >> 4)) * 90 / 512).toFixed(3) // º
+          }
         }
         if ((data[1] >> 3 & 0b1) === 1) {
           record.bds60IAS =  ((data[1] & 0b111) << 7) | (data[2] >> 1) // kt
@@ -290,11 +316,21 @@ function parse250(record: DataRecord048, buffer: Uint8Array): number {
         }
         if ((data[4] >> 5 & 0b1) === 1) {
           const sign = (data[4] >> 4 & 0b1) === 1 ? -1 : 1
-          record.bds60BarometricAltitudeRate = sign * (((data[4] & 0b1111) << 5) | (data[5] >> 3)) * 8192 / 256 // ft/min
+          if(sign == -1){
+            record.bds60BarometricAltitudeRate = sign * (16384-(((data[4] & 0b1111) << 5) | (data[5] >> 3)) * 8192 / 256) // ft/min
+          }
+          else{
+          record.bds60BarometricAltitudeRate =  (((data[4] & 0b1111) << 5) | (data[5] >> 3)) * 8192 / 256 // ft/min
+          }
         }
         if ((data[5] >> 2 & 0b1) === 1) {
           const sign = (data[5] >> 1 & 0b1) === 1 ? -1 : 1
-          record.bds60InertialVerticalVelocity = sign * (((data[5] & 0b1) << 8) | data[6]) * 8192 / 256 // ft/min
+          if(sign == -1){
+            record.bds60InertialVerticalVelocity = sign * (16384-(((data[5] & 0b1) << 8) | data[6]) * 8192 / 256) // ft/min
+          }
+          else{
+            record.bds60InertialVerticalVelocity = (((data[5] & 0b1) << 8) | data[6]) * 8192 / 256 // ft/min
+          }
         }
       }
     }
