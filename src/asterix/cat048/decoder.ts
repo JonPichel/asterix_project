@@ -217,17 +217,12 @@ function parse250(record: DataRecord048, buffer: Uint8Array): number {
   const n = buffer[0]
   const bds = []
   for (let i = 0; i < n; i++) {
-   const data = buffer.slice(1 + 8 * i, 1 + 8 * (i + 1)-2)
+   const data = buffer.slice(1 + 8 * i, 1 + 8 * (i + 1)-1)
    const bds1 = buffer[1 + 8*(i+1) - 1] >> 4
    const bds2 = buffer[1 + 8*(i+1) - 1] & 0b1111
-   /*
-   console.log('Empeiza aqui',data)
-   console.log(bds1)
-   console.log(bds2)
-   */
+   bds.push('BDS ' + bds1 + '.'+ bds2 + ' ')
     if (bds2 == 0) {
       if (bds1 == 4) {
-        bds.push('BDS 4.0 ')
         if ((data[0] >> 7 & 0b1) === 1) {
           // XAAAAAAA BBBBBXXX
           // 0AAAA AAA00000
@@ -241,23 +236,22 @@ function parse250(record: DataRecord048, buffer: Uint8Array): number {
           //          BB BBBBBB00
           //             000000CC
           // 00 0000AABB BBBBBBCC
-          record.bds40FMSSelectedAltitude = ((data[1] & 0b11) << 10) | (data[2] << 2) | (data[3] >> 6) * 16 // ft
+          record.bds40FMSSelectedAltitude = (((data[1] & 0b11) << 10) | (data[2] << 2) | (data[3] >> 6)) * 16 // ft
         }
         if ((data[3] >> 5 & 0b1) === 1) {
           // XXXAAAAA BBBBBBB0
           // 000AAAAA A0000000
           //          0BBBBBBB
           // 000AAAAA ABBBBBBB
-          record.bds40BarometricPressureSetting = +((((data[3] & 0b11111) << 7) | (data[4] >> 1)) * 0.1).toFixed(3) // mb
+          record.bds40BarometricPressureSetting = (+((((data[3] & 0b11111) << 7) | (data[4] >> 1)) * 0.1).toFixed(3))+800 // mb
         }
-        if ((data[5] & 0b1) === 1) {
+        if ((data[5] & 0b1) === 1) {//MAAAL
           record.bds40MCPFCUMode = data[6] >> 5
         }
-        if ((data[6] >> 2 & 0b1) === 1) {
+        if ((data[6] >> 2 & 0b1) === 1) {//MAAAL
           record.bds40TargetAltSource = data[6] & 0b11
         }
       } else if (bds1 == 5) {
-        bds.push('BDS 5.0 ')
         if ((data[0] >> 7 & 0b1) === 1) {
           const sign = (data[0] >> 6 & 0b1) === 1 ? -1 : 1
           if(sign == -1){
@@ -298,7 +292,6 @@ function parse250(record: DataRecord048, buffer: Uint8Array): number {
           record.bds50TAS = (((data[5] & 0b11) << 8) | data[6]) * 2 // kt
         }
       } else if (bds1 == 6) {
-        bds.push('BDS 6.0')
         if ((data[0] >> 7 & 0b1) === 1) {
           const sign = (data[0] >> 6 & 0b1) === 1 ? -1 : 1
           if(sign == -1){
@@ -323,7 +316,7 @@ function parse250(record: DataRecord048, buffer: Uint8Array): number {
           record.bds60BarometricAltitudeRate =  (((data[4] & 0b1111) << 5) | (data[5] >> 3)) * 8192 / 256 // ft/min
           }
         }
-        if ((data[5] >> 2 & 0b1) === 1) {
+        if ((data[5] >> 2 & 0b1) === 1) {//MAAAL
           const sign = (data[5] >> 1 & 0b1) === 1 ? -1 : 1
           if(sign == -1){
             record.bds60InertialVerticalVelocity = sign * (16384-(((data[5] & 0b1) << 8) | data[6]) * 8192 / 256) // ft/min
