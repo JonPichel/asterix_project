@@ -33,62 +33,62 @@ export function TYPtoString(value?: TYP): string {
 }
 
 export function SIMtoString(value?: boolean) {
-  if (value === null || value === undefined) return ''
+  if (value === null || value === undefined) return 'N/A'
 
   return value ? 'Simulated target report'
                : 'Actual target report'
 }
 
 export function RDPtoString(value?: boolean) {
-  if (value === null || value === undefined) return ''
+  if (value === null || value === undefined) return 'N/A'
   return value ? 'Report from RDP Chain 2'
                : 'Report from RDP Chain 1'
 }
 
 export function SPItoString(value?: boolean) {
-  if (value === null || value === undefined) return ''
+  if (value === null || value === undefined) return 'N/A'
 
   return value ? 'Special Position Identification'
                : 'Absence of SPI'
 }
 
 export function RABtoString(value?: boolean) {
-  if (value === null || value === undefined) return ''
+  if (value === null || value === undefined) return 'N/A'
 
   return value ? 'Report from field monitor (fixed transponder)'
                : 'Report from aircraft transponder'
 }
 
 export function TSTtoString(value?: boolean) {
-  if (value === null || value === undefined) return ''
+  if (value === null || value === undefined) return 'N/A'
 
   return value ? 'Test target report'
                : 'Real target report'
 }
 
 export function ERRtoString(value?: boolean) {
-  if (value === null || value === undefined) return ''
+  if (value === null || value === undefined) return 'N/A'
   
   return value ? 'No Extended Range'
                : 'Extended Range present'
 }
 
 export function XPPtoString(value?: boolean) {
-  if (value === null || value === undefined) return ''
+  if (value === null || value === undefined) return 'N/A'
 
   return value ? 'X-Pulse present'
                : 'No X-Pulse present'
 }
 
 export function MEtoString(value?: boolean) {
-  if (value === null || value === undefined) return ''
+  if (value === null || value === undefined) return 'N/A'
 
   return value ? 'Military emergency'
                : 'No military emergency'
 }
 
 export function MItoString(value?: boolean) {
-  if (value === null || value === undefined) return ''
+  if (value === null || value === undefined) return 'N/A'
 
   return value ? 'Military identification'
                : 'No military identification'
@@ -177,25 +177,25 @@ export function ClimbingDescendingtoString(value?: typClimbingMode) {
   }
 }
 export function TREtoString(value?: boolean) {
-  if (value === null || value === undefined) return ''
+  if (value === null || value === undefined) return 'N/A'
 
   return value ? 'End of track lifetime'
                : 'Track still alive'
 }
 export function GHOtoString(value?: boolean) {
-  if (value === null || value === undefined) return ''
+  if (value === null || value === undefined) return 'N/A'
 
   return value ? 'Ghost target track'
                : 'True target track'
 }
 export function SUPtoString(value?: boolean) {
-  if (value === null || value === undefined) return ''
+  if (value === null || value === undefined) return 'N/A'
 
   return value ? 'yes'
                : 'no'
 }
 export function TCCtoString(value?: boolean) {
-  if (value === null || value === undefined) return ''
+  if (value === null || value === undefined) return 'N/A'
 
   return value ? 'Reference plane,tangential to the Earth modelat the radar site co-ordinates'
                : 'Radar plane'
