@@ -13,7 +13,7 @@
     "build": "quasar build"
   },
   "dependencies": {
-    "@arcgis/core": "^4.27.6",
+    "@arcgis/core": "^4.28.9",
     "@quasar/extras": "^1.16.4",
     "pinia": "^2.0.11",
     "quasar": "^2.6.0",

@@ -145,7 +145,7 @@ function parse070(record: DataRecord048, buffer: Uint8Array): number {
 function parse090(record: DataRecord048, buffer: Uint8Array): number {
   record.flightLevelValidated = (buffer[0] >> 7 & 0b1) == 0
   record.flightLevelGarbled = (buffer[0] >> 6 & 0b1) == 1
-  record.flightLevel = (((buffer[0] & 0b111111) << 8) | buffer[1]) * 0.25 // FL
+  record.flightLevel = twosComplement((((buffer[0] & 0b111111) << 8) | buffer[1]), 14)*0.25// FL
 
   return 2
 }

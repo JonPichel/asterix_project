@@ -36,6 +36,16 @@ export function octalToDecimal(octal: number, numDigits: number): number {
 }
 
 export function twosComplement(value: number, numBits: number): number {
+  const intValue = Math.round(value); // Convertir a entero
+  const mask = (1 << numBits) - 1; //Para asegurarnos que solo pillamos los bits relevantes creamos estas mascara
+  const maskedValue = intValue & mask; //Aqui le aplicamos la mascara 
+  if ((maskedValue >> (numBits - 1)) === 1) {
+    return -((~maskedValue + 1) & mask);
+  } else {
+    return maskedValue;
+  }
+}
+/*export function twosComplement(value: number, numBits: number): number {
   if ((value >> (numBits - 1)) === 1) {
     // Negative value
     return ~value + 1
@@ -43,4 +53,4 @@ export function twosComplement(value: number, numBits: number): number {
     // Positive value
     return value
   }
-}
+}*/
