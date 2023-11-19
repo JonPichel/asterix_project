@@ -36,6 +36,7 @@ export class DataRecord048 implements DataRecord {
   flightLevelValidated?: boolean;
   flightLevelGarbled?: boolean;
   flightLevel?: number;
+  correctedFlightLevel?:number;
   // I048/130
   radarPlotSRL?: number;
   radarPlotSRR?: number;
@@ -48,7 +49,7 @@ export class DataRecord048 implements DataRecord {
   aircraftaddress?: string; 
   //I048/240
   aircraftid?: string;
-  // I048/250 FALTA PONERLOS EN LA TABLA
+  // I048/250 
   bds?: string[];
   bds40MCPFCUSelectedAltitude?: number;
   bds40FMSSelectedAltitude?: number;
@@ -119,24 +120,25 @@ export class DataRecord048 implements DataRecord {
       { name: 'flv', label: 'Flight Level V', field: (row: DataRecord) => ValidatedtoString((row as DataRecord048).flightLevelValidated) },
       { name: 'flg', label: 'Flight Level G', field: (row: DataRecord) => GarbledtoString((row as DataRecord048).flightLevelGarbled) },
       { name: 'fl', label: 'Flight Level', field: 'flightLevel' },
-      {name: 'aircraftaddress', label:'Aircraft Address', field:'aircraftaddress'},
-      {name: 'bds', label: 'BDS', field: 'bds'},
-      {name: 'MCPFCUSelected Altitude', label: 'MCP/FCU Selected Altitude', field: 'bds40MCPFCUSelectedAltitude'},
-      {name: 'FMS Selected Altitude', label: 'FMS Selected Altitude', field: 'bds40FMSSelectedAltitude'},
-      {name: 'BarometricPressureSetting', label: 'Barometric Pressure Setting', field: 'bds40BarometricPressureSetting'},
-      {name: 'MCPFCU Mode', label: 'MCP/FCU Mode', field: (row: DataRecord) =>  BDS.MCPFCUModetoString((row as DataRecord048).bds40MCPFCUMode)},
-      {name: 'TargetAltSource', label: 'TargetAltSource', field: (row: DataRecord) =>  BDS.TargetAltSourcetoString((row as DataRecord048).bds40TargetAltSource)},
-      {name: 'Roll Angle', label: 'Roll Angle', field: 'bds50Roll'},
-      {name: 'True Track Angle', label: 'True Track Angle', field: 'bds50TrueTrack'},
-      {name: 'Ground Speed', label: 'Ground Speed', field: 'bds50GS'},
-      {name: 'Track Angle Rate', label: 'Track Angle Rate', field: 'bds50TrackRate'},
-      {name: 'True Air Speed', label: 'True Air Speed', field: 'bds50TAS'},
-      {name: 'Magnetic Heading', label: 'Magnetic Heading', field: 'bds60MagneticHeading'},
-      {name: 'IAS', label: 'IAS', field: 'bds60IAS'},
-      {name: 'MACH', label: 'MACH', field: 'bds60MACH'},
-      {name: 'Barometric Altitude Rate', label: 'Barometric Altitude Rate', field: 'bds60BarometricAltitudeRate'},
-      {name: 'InertialVerticalVelocity', label: 'InertialVerticalVelocity', field: 'bds60InertialVerticalVelocity'},
-      {name: 'tracknumber', label:'Track Number', field:'tracknumber'},
+      { name: 'Correctedfl', label: 'Corrected Flight Level', field: 'correctedFlightLevel' },
+      { name: 'aircraftaddress', label:'Aircraft Address', field:'aircraftaddress'},
+      { name: 'bds', label: 'BDS', field: 'bds'},
+      { name: 'MCPFCUSelected Altitude', label: 'MCP/FCU Selected Altitude', field: 'bds40MCPFCUSelectedAltitude'},
+      { name: 'FMS Selected Altitude', label: 'FMS Selected Altitude', field: 'bds40FMSSelectedAltitude'},
+      { name: 'BarometricPressureSetting', label: 'Barometric Pressure Setting', field: 'bds40BarometricPressureSetting'},
+      { name: 'MCPFCU Mode', label: 'MCP/FCU Mode', field: (row: DataRecord) =>  BDS.MCPFCUModetoString((row as DataRecord048).bds40MCPFCUMode)},
+      { name: 'TargetAltSource', label: 'TargetAltSource', field: (row: DataRecord) =>  BDS.TargetAltSourcetoString((row as DataRecord048).bds40TargetAltSource)},
+      { name: 'Roll Angle', label: 'Roll Angle', field: 'bds50Roll'},
+      { name: 'True Track Angle', label: 'True Track Angle', field: 'bds50TrueTrack'},
+      { name: 'Ground Speed', label: 'Ground Speed', field: 'bds50GS'},
+      { name: 'Track Angle Rate', label: 'Track Angle Rate', field: 'bds50TrackRate'},
+      { name: 'True Air Speed', label: 'True Air Speed', field: 'bds50TAS'},
+      { name: 'Magnetic Heading', label: 'Magnetic Heading', field: 'bds60MagneticHeading'},
+      { name: 'IAS', label: 'IAS', field: 'bds60IAS'},
+      { name: 'MACH', label: 'MACH', field: 'bds60MACH'},
+      { name: 'Barometric Altitude Rate', label: 'Barometric Altitude Rate', field: 'bds60BarometricAltitudeRate'},
+      { name: 'InertialVerticalVelocity', label: 'InertialVerticalVelocity', field: 'bds60InertialVerticalVelocity'},
+      { name: 'tracknumber', label:'Track Number', field:'tracknumber'},
       { name: 'cnf', label: 'Confirmed vs Tentative track', field: (row: DataRecord) =>  TargetReport.ConfirmedTentavitoString((row as DataRecord048).targetcnf)},
       { name: 'rad', label: 'Type of sensors maintaining track', field: (row: DataRecord) =>  TargetReport.TypsensortoString((row as DataRecord048).targetrad)},
       { name: 'dou', label: 'Signal level of confidence n plot to track', field: (row: DataRecord) =>  TargetReport.SignalsLevelsConfidencetoString((row as DataRecord048).targetdou)},
@@ -178,4 +180,5 @@ export class DataRecord048 implements DataRecord {
  
     return `${hours}:${minutes}:${seconds}:${ms}`
   }
+  
 }

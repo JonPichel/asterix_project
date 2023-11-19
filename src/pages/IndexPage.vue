@@ -32,6 +32,7 @@
                 @change="onFileSelect"
               />
               <q-btn round icon="delete" size="sm" @click="onFileDelete" />
+              <q-btn round icon="download" size="sm" @click="downloadCSV" />
             </div>
           </div>
         </div>
@@ -55,6 +56,7 @@ import { useFileStore } from 'stores/file-store'
 import { AsterixFile, TableColumn, DataRecord } from 'src/asterix/model'
 import { DataRecord048 } from 'src/asterix/cat048/cat048'
 import EsriMap from 'src/components/EsriMap.vue'
+import Papa from 'papaparse';
 
 const fileStore = useFileStore()
 
@@ -108,6 +110,30 @@ function onFileDelete() {
 const columns = ref<TableColumn[]>(new DataRecord048().columns())
 const rows = computed(() => fileStore.files.map(file => file.dataRecords).flat())
 
+
+function downloadCSV() {
+  // Obtener datos de la tabla (q-table en tu caso)
+  const tableData = rows;
+
+  // Convertir datos a un formato que acepte papaparse
+  const csvData = tableData.value.map(row => {
+    return row as DataRecord048;
+  });
+
+  // Convertir datos a CSV usando papaparse
+  const csv = Papa.unparse(csvData, { header: true, delimiter: ';' });
+
+  // Crear un Blob con el contenido CSV
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+
+  // Crear un enlace de descarga y simular clic para descargar el archivo
+  const tempLink = document.createElement('a');
+  tempLink.href = URL.createObjectURL(blob);
+  tempLink.setAttribute('download', 'datosAsterix.csv');
+  document.body.appendChild(tempLink);
+  tempLink.click();
+  document.body.removeChild(tempLink);
+}
 </script>
 
 <style scoped>

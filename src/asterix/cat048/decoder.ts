@@ -146,7 +146,6 @@ function parse090(record: DataRecord048, buffer: Uint8Array): number {
   record.flightLevelValidated = (buffer[0] >> 7 & 0b1) == 0
   record.flightLevelGarbled = (buffer[0] >> 6 & 0b1) == 1
   record.flightLevel = twosComplement((((buffer[0] & 0b111111) << 8) | buffer[1]), 14)*0.25// FL
-
   return 2
 }
 
@@ -244,11 +243,16 @@ function parse250(record: DataRecord048, buffer: Uint8Array): number {
           //          0BBBBBBB
           // 000AAAAA ABBBBBBB
           record.bds40BarometricPressureSetting = (+((((data[3] & 0b11111) << 7) | (data[4] >> 1)) * 0.1).toFixed(3))+800 // mb
+          if( record.flightLevel!=undefined && record.bds40BarometricPressureSetting !=undefined && record.bds40MCPFCUSelectedAltitude !=undefined ){
+            if(record.bds40MCPFCUSelectedAltitude <= 6000){
+              record.correctedFlightLevel = +(record.flightLevel + ((record.bds40BarometricPressureSetting-1013.25)*30/(100))).toFixed(3) * 100
+            }
+          }
         }
-        if ((data[5] & 0b1) === 1) {//MAAAL
+        if ((data[5] & 0b1) === 1) {
           record.bds40MCPFCUMode = data[6] >> 5
         }
-        if ((data[6] >> 2 & 0b1) === 1) {//MAAAL
+        if ((data[6] >> 2 & 0b1) === 1) {
           record.bds40TargetAltSource = data[6] & 0b11
         }
       } else if (bds1 == 5) {
@@ -288,7 +292,7 @@ function parse250(record: DataRecord048, buffer: Uint8Array): number {
             record.bds50TrackRate = +(sign * (((data[4] & 0b1111) << 5) | (data[5] >> 3)) * 8 / 256).toFixed(3) // º/s
           }
         }
-        if ((data[5] >> 2 & 0b1) === 1) { //MAAAL
+        if ((data[5] >> 2 & 0b1) === 1) { 
           record.bds50TAS = (((data[5] & 0b11) << 8) | data[6]) * 2 // kt
         }
       } else if (bds1 == 6) {

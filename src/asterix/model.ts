@@ -1,4 +1,4 @@
-import { DataRecord048 } from "./cat048/cat048";
+import { DataRecord048 } from './cat048/cat048';
 
 export interface AsterixFile {
   filename: string;
