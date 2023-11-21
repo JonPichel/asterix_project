@@ -2,6 +2,9 @@ import EsriMap from "@arcgis/core/Map"
 import SceneView from "@arcgis/core/views/SceneView"
 import SpatialReference from "@arcgis/core/geometry/SpatialReference"
 import Track from "@arcgis/core/widgets/Track"
+import TimeSlider from "@arcgis/core/widgets/TimeSlider"
+import TimeExtent from "@arcgis/core/TimeExtent"
+import TimeInterval from "@arcgis/core/TimeInterval"
 import type Layer from "@arcgis/core/layers/Layer"
 
 import { RADAR_BCN } from "./locations"
@@ -9,41 +12,83 @@ import { RADAR_BCN } from "./locations"
 // Load style
 import "@arcgis/core/assets/esri/themes/dark/main.css"
 
-export let map: EsriMap
-export let view: SceneView
+import { DataRecord } from "src/asterix"
+import { createPlaneLayer, getPlaneFeatures } from "./plane"
+import FeatureLayer from "@arcgis/core/layers/FeatureLayer"
 
 export const SPATIAL_REFERENCE = new SpatialReference({
   wkid: 102100,
 })
 
-export function createMap() {
-  map = new EsriMap({
-    basemap: "satellite",
-    ground: "world-elevation",
-  })
+export class ArcgisMap {
+  map: EsriMap
+  view: SceneView
+  layer: FeatureLayer | null
+  timeSlider: TimeSlider | null
 
-  view = new SceneView({
-    container: "viewDiv",
-    map: map,
-    spatialReference: SPATIAL_REFERENCE,
-    camera: RADAR_BCN,
-  })
-}
+  constructor(container: string) {
+    this.map = new EsriMap({
+      basemap: "satellite",
+      ground: "world-elevation",
+    })
 
-function initializeWidgets() {
-  const track = new Track({
-    view: view,
-  })
+    this.view = new SceneView({
+      container,
+      map: this.map,
+      spatialReference: SPATIAL_REFERENCE,
+      camera: RADAR_BCN,
+    })
 
-  view.ui.add(track, "top-left")
-}
+    const track = new Track({
+      view: this.view,
+    })
 
-export function destroyMap() {
-  // This destroys any elements attached to the view (map, ui, popups...)
-  // Likewise, map destroys its layers, graphics, etc.
-  view.destroy()
-}
+    this.view.ui.add(track, "top-left")
 
-export function addLayer(layer: Layer) {
-  map.add(layer)
+    this.layer = null
+    this.timeSlider = null
+  }
+
+  addLayer(layer: Layer) {
+    this.map.add(layer)
+  }
+
+  async addDataRecords(records: DataRecord[]) {
+    if (this.layer !== null) {
+      this.map.remove(this.layer)
+      this.layer.destroy()
+    }
+    if (this.timeSlider !== null) {
+      this.view.ui.remove(this.timeSlider)
+      this.timeSlider.destroy()
+    }
+
+    const features = getPlaneFeatures(records)
+    this.layer = createPlaneLayer([])
+    this.map.add(this.layer)
+    await this.view.whenLayerView(this.layer)
+
+    this.timeSlider = new TimeSlider({
+      container: "sliderDiv",
+      view: this.view,
+      mode: "time-window",
+      timeVisible: true,
+      stops: {
+        interval: new TimeInterval({
+          value: 1,
+          unit: "seconds",
+        }),
+      },
+      fullTimeExtent: this.layer.timeInfo.fullTimeExtent,
+      timeExtent: new TimeExtent({
+        start: this.layer.timeInfo.fullTimeExtent.start,
+        end: this.layer.timeInfo.fullTimeExtent.start.getTime() + 10_000,
+      }),
+      playRate: 10,
+    })
+  }
+
+  destroy() {
+    this.view.destroy()
+  }
 }
