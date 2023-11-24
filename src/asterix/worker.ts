@@ -1,16 +1,25 @@
-import { decodeBuffer } from "./decoder"
-import { AsterixFile, DataRecord } from "./model"
+import { DataRecord } from "."
+import { decodeBuffer } from "./binary"
 
 export type DecodeFilesMessage = File[]
 
-addEventListener("message", e => {
+export type FileDecodedMessage = {
+  filename: string
+  records: DataRecord[]
+}
+
+addEventListener("message", (e) => {
   const files = e.data as DecodeFilesMessage
 
-  files.forEach(file => {
+  files.forEach((file) => {
     const filename = file.name
-    file.arrayBuffer().then(content => {
-      const dataRecords = decodeBuffer(content)
-      postMessage({filename, dataRecords} as AsterixFile)
+    console.log("add start", new Date())
+    file.arrayBuffer().then((content) => {
+      const records = decodeBuffer(content)
+      postMessage({
+        filename,
+        records,
+      } as FileDecodedMessage)
     })
   })
 })
