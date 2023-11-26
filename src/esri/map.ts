@@ -3,7 +3,6 @@ import SceneView from "@arcgis/core/views/SceneView"
 import SpatialReference from "@arcgis/core/geometry/SpatialReference"
 import Track from "@arcgis/core/widgets/Track"
 import TimeSlider from "@arcgis/core/widgets/TimeSlider"
-import TimeExtent from "@arcgis/core/TimeExtent"
 import TimeInterval from "@arcgis/core/TimeInterval"
 import type Layer from "@arcgis/core/layers/Layer"
 
@@ -13,8 +12,7 @@ import { RADAR_BCN } from "./locations"
 import "@arcgis/core/assets/esri/themes/dark/main.css"
 
 import { DataRecord } from "src/asterix"
-import { createPlaneLayer, getPlaneFeatures } from "./plane"
-import FeatureLayer from "@arcgis/core/layers/FeatureLayer"
+import PlaneLayer from "./PlaneLayer"
 
 export const SPATIAL_REFERENCE = new SpatialReference({
   wkid: 102100,
@@ -23,7 +21,7 @@ export const SPATIAL_REFERENCE = new SpatialReference({
 export class ArcgisMap {
   map: EsriMap
   view: SceneView
-  layer: FeatureLayer | null
+  planeLayer: PlaneLayer
   timeSlider: TimeSlider | null
 
   constructor(container: string) {
@@ -39,13 +37,13 @@ export class ArcgisMap {
       camera: RADAR_BCN,
     })
 
+    this.planeLayer = new PlaneLayer(this)
+
     const track = new Track({
       view: this.view,
     })
-
     this.view.ui.add(track, "top-left")
 
-    this.layer = null
     this.timeSlider = null
   }
 
@@ -54,40 +52,31 @@ export class ArcgisMap {
   }
 
   async addDataRecords(records: DataRecord[]) {
-    if (this.layer !== null) {
-      this.map.remove(this.layer)
-      this.layer.destroy()
-    }
     if (this.timeSlider !== null) {
-      this.view.ui.remove(this.timeSlider)
-      this.timeSlider.destroy()
+      this.timeSlider.stop()
+    } else {
+      this.timeSlider = new TimeSlider({
+        container: "sliderDiv",
+        mode: "instant",
+        timeVisible: true,
+        stops: {
+          interval: new TimeInterval({
+            value: 10,
+            unit: "seconds",
+          }),
+        },
+        playRate: 1000,
+      })
+      this.view.ui.add(this.timeSlider, "manual")
+      this.timeSlider.watch("timeExtent", () => {
+        requestAnimationFrame(() =>
+          this.planeLayer.update(this.timeSlider!.timeExtent.start.getTime())
+        )
+      })
     }
 
-    console.log(records[0])
-    const features = getPlaneFeatures(records)
-    console.log(features.slice(0, 10))
-    this.layer = createPlaneLayer(features)
-    this.map.add(this.layer)
-    await this.view.whenLayerView(this.layer)
-
-    this.timeSlider = new TimeSlider({
-      container: "sliderDiv",
-      view: this.view,
-      mode: "time-window",
-      timeVisible: true,
-      stops: {
-        interval: new TimeInterval({
-          value: 1,
-          unit: "seconds",
-        }),
-      },
-      fullTimeExtent: this.layer.timeInfo.fullTimeExtent,
-      timeExtent: new TimeExtent({
-        start: this.layer.timeInfo.fullTimeExtent.start,
-        end: this.layer.timeInfo.fullTimeExtent.start.getTime() + 10_000,
-      }),
-      playRate: 10,
-    })
+    const timeExtent = this.planeLayer.loadData(records)
+    this.timeSlider.fullTimeExtent = timeExtent
   }
 
   destroy() {

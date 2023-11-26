@@ -4,7 +4,7 @@ import { ref } from "vue"
 
 type Metadata = {
   filename: string
-  targetID: string
+  aircraftID: string
 }
 
 type LoadedFile = {
@@ -31,20 +31,20 @@ export const useRecordStore = defineStore("records", () => {
     const recordsByTarget = new Map<string, DataRecord[]>()
     records.forEach((record) => {
       let records: DataRecord[]
-      if (recordsByTarget.has(record.aircraftID)) {
-        records = recordsByTarget.get(record.aircraftID)!
+      if (recordsByTarget.has(record.aircraftID!)) {
+        records = recordsByTarget.get(record.aircraftID!)!
       } else {
         records = []
       }
       records.push(record)
 
-      recordsByTarget.set(record.aircraftID, records)
+      recordsByTarget.set(record.aircraftID!, records)
     })
 
     recordsByTarget.forEach((records, targetID) => {
       const md: Metadata = {
         filename,
-        targetID: targetID,
+        aircraftID: targetID,
       }
       recordsMap.value.set(md, records)
     })
