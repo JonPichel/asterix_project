@@ -139,8 +139,8 @@ function parse020(record: DataRecord048, buffer: Uint8Array): number {
 }
 
 function parse040(record: DataRecord048, buffer: Uint8Array): number {
-  record.rho = (((buffer[0] << 8) | buffer[1]) * 1) / 256 // nautical miles
-  record.theta = (((buffer[2] << 8) | buffer[3]) * 360) / 65536 // degrees
+  record.rho = +((((buffer[0] << 8) | buffer[1]) * 1) / 256).toFixed(4) // nautical miles
+  record.theta = +((((buffer[2] << 8) | buffer[3]) * 360) / 65536).toFixed(4) // degrees
 
   return 4
 }

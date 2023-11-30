@@ -3,6 +3,9 @@ import { onMounted, onBeforeUnmount } from "vue"
 
 import { ArcgisMap } from "src/esri/map"
 import { DataRecord } from "src/asterix"
+import { point } from "@turf/helpers";
+import { GPSCoords } from "src/coords";
+
 
 let map: ArcgisMap
 
@@ -18,7 +21,7 @@ defineExpose({
   addToMap(records: DataRecord[]) {
     map.addDataRecords(records)
   }
-})
+}) 
 </script>
 
 <template>

@@ -81,6 +81,12 @@ const Category048: AsterixCategory = {
       },
       { name: "rho", label: "RHO (nm)", field: "rho" },
       { name: "theta", label: "THETA (º)", field: "theta" },
+      { name: "latitude", label: "Latitude", field: (row: DataRecord048) => row.gpsCoords?.lat.toFixed(6).toString() || "N/A"},
+      {
+        name: "longitude",
+        label: "Longitude",
+        field: (row: DataRecord048) => row.gpsCoords?.lon.toFixed(6).toString() || "N/A",
+      },
       {
         name: "mode3av",
         label: "Mode3A V",
@@ -95,7 +101,7 @@ const Category048: AsterixCategory = {
       {
         name: "mode3ac",
         label: "Mode3A Code",
-        field: (row: DataRecord048) => row.mode3ACode?.toString(8) ?? "",
+        field: (row: DataRecord048) => row.mode3ACode?.toString(8).padStart(4, "0") ?? "",
       },
 
       {
