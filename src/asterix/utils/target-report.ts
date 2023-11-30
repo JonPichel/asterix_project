@@ -156,7 +156,7 @@ export enum typClimbingMode {
 }
 export function ClimbingDescendingtoString(value?: typClimbingMode) {
   if (value === null || value === undefined) return "N/A"
-  //DUDA: Al profe no le da infrmacion de este valor pero a nosotros si que nos dice lo de climbing y esas cosas
+
   switch (value) {
     case typClimbingMode.Maintaining:
       return "Maintaining"

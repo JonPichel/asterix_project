@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue"
+import { computed, ref, watch } from "vue"
 import { useRecordStore } from "stores/record-store"
 import { DataRecord, TableColumn } from "src/asterix"
 
@@ -28,7 +28,9 @@ const emit = defineEmits<{
 
 
 const columns = ref<TableColumn[]>(Category048.tableColumns())
-const rows = computed(() => Array.from(recordStore.recordsMap.values()).reduce((result, value) => result.concat(value), []))
+const rows = computed(() => {
+  return Array.from(recordStore.recordsMap.values()).reduce((result, value) => result.concat(value), [])
+})
 
 function addFiles(event: Event) {
   const files = Array.from((event.target as HTMLInputElement).files!)
@@ -116,7 +118,6 @@ function downloadCSV() {
           title="Data Records Category 048"
           :columns="columns"
           :rows="rows"
-          row-key="id"
           style="height:100%"
         />
       </div>

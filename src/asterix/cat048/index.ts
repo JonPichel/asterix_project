@@ -18,6 +18,10 @@ const Category048: AsterixCategory = {
         label: "Time",
         field: (row: DataRecord048) =>
           secondsSinceMidnightToString(row.secondsSinceMidnight),
+        sortable: true,
+        sort: (a: string, b: string, rowA: any, rowB: any) => {
+          return rowA.secondsSinceMidnight - rowB.secondsSinceMidnight
+        },
       },
       {
         name: "trtyp",
@@ -36,6 +40,7 @@ const Category048: AsterixCategory = {
         label: "TR RDP",
         field: (row: DataRecord048) =>
           TargetReport.RDPtoString(row.targetReportRDPChain),
+        sortable: true,
       },
       {
         name: "trspi",
@@ -127,7 +132,11 @@ const Category048: AsterixCategory = {
         label: "Aircraft Address",
         field: "aircraftaddress",
       },
-      { name: "bds", label: "BDS", field: "bds" },
+      {
+        name: "bds",
+        label: "BDS",
+        field: (row: DataRecord048) => row.bds?.join(" ") ?? "",
+      },
       {
         name: "MCPFCUSelected Altitude",
         label: "MCP/FCU Selected Altitude",
@@ -238,7 +247,12 @@ const Category048: AsterixCategory = {
       },
       { name: "Xcomponent", label: "X-Component", field: "Xcomponent" },
       { name: "Ycomponent", label: "Y-Component", field: "Ycomponent" },
-      { name: "aircraftid", label: "Aircraft ID", field: "aircraftID" },
+      {
+        name: "aircraftid",
+        label: "Aircraft ID",
+        field: "aircraftID",
+        sortable: true,
+      },
       { name: "h3D", label: "3D height", field: "h3D" },
       {
         name: "COM",

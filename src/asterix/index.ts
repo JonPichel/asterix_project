@@ -14,6 +14,8 @@ export type TableColumn = {
   name: string
   label: string
   field: string | ((row: DataRecord) => string)
+  sortable?: boolean
+  sort?: (a: string, b: string, rowA: any, rowB: any) => number
 }
 
 export interface AsterixCategory {
