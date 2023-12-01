@@ -51,7 +51,7 @@ function getVisibleRecords(records: DataRecord[], timestamp: number) {
   }
 }
 
-type Aircraft = {
+export type Aircraft = {
   aircraftID: string
   records: DataRecord[]
   added: boolean
