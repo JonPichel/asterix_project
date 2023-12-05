@@ -440,7 +440,8 @@ function parse230(record: DataRecord048, buffer: Uint8Array): number {
   record.ccfMSSC = buffer[1] >> 7 === 1
   record.ccfARC = ((buffer[1] >> 6) & 0b1) === 1
   record.ccfAIC = ((buffer[1] >> 5) & 0b1) === 1
-  //......
+  record.ccfB1A = ((buffer[1] >> 4) & 0b1)
+  record.ccfB1B = (buffer[1] & 0b1111)
 
   return 2
 }

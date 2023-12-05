@@ -332,12 +332,12 @@ const Category048: AsterixCategory = {
       {
         name: "ccfB1A",
         label: "B1A",
-        field: "ccfB1A",
+        field: (row: DataRecord048) => "BDS 1.0 bit 16 = " + row.ccfB1A?.toString() || "N/A",
       },
       {
         name: "ccfB1B",
         label: "B1B",
-        field: "ccfB1B",
+        field: (row: DataRecord048) => "BDS 1.0 bits 37/40 = " + row.ccfB1B?.toString(2).padStart(4, "0") || "N/A",
       },
     ]
   },
