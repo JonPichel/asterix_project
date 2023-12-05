@@ -179,7 +179,7 @@ function parse130(record: DataRecord048, buffer: Uint8Array): number {
   for (const subfrn of resultFX.positions) {
     switch (subfrn) {
       case 1:
-        record.radarPlotSRL = (buffer[fieldStart] * 360) / 8192
+        record.radarPlotSRL = +((buffer[fieldStart] * 360) / 8192).toFixed(3)
         fieldStart++
         break
       case 2:
@@ -402,8 +402,8 @@ function parse042(record: DataRecord048, buffer: Uint8Array): number {
 }
 
 function parse200(record: DataRecord048, buffer: Uint8Array): number {
-  record.calculatedgroundspeed = (buffer[0] << 8) | (buffer[1] * 0.22)
-  record.calculatedheading = (buffer[2] << 8) | (buffer[3] * (360 / 65536))
+  record.calculatedgroundspeed = ((buffer[0] << 8) | (buffer[1]))* 0.22
+  record.calculatedheading = +(((buffer[2] << 8) | (buffer[3]))*(360 / 65536)).toFixed(4)
   return 4
 }
 

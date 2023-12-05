@@ -121,7 +121,7 @@ const Category048: AsterixCategory = {
         field: (row: DataRecord048) =>
           Code.GarbledtoString(row.flightLevelGarbled),
       },
-      { name: "fl", label: "Flight Level", field: "flightLevel" },
+      { name: "fl", label: "Flight Level", field: (row: DataRecord048) => row.flightLevel?.toString() || "N/A" },
       {
         name: "correctedfl",
         label: "Corrected Flight Level",
@@ -130,7 +130,7 @@ const Category048: AsterixCategory = {
       {
         name: "radarPlotSRL",
         label: "Plot SRL",
-        field: (row: DataRecord048) => row.radarPlotSRL?.toFixed(3).toString() || "N/A"
+        field: (row: DataRecord048) => row.radarPlotSRL?.toString() || "N/A"
       },
       {
         name: "radarPlotSRR",
@@ -181,17 +181,17 @@ const Category048: AsterixCategory = {
       {
         name: "MCPFCUSelected Altitude",
         label: "MCP/FCU Selected Altitude",
-        field: "bds40MCPFCUSelectedAltitude",
+        field: (row: DataRecord048) => row.bds40MCPFCUSelectedAltitude?.toString() || "N/A"
       },
       {
         name: "FMS Selected Altitude",
         label: "FMS Selected Altitude",
-        field: "bds40FMSSelectedAltitude",
+        field: (row: DataRecord048) => row.bds40FMSSelectedAltitude?.toString() || "N/A"
       },
       {
         name: "BarometricPressureSetting",
         label: "Barometric Pressure Setting",
-        field: "bds40BarometricPressureSetting",
+        field: (row: DataRecord048) => row.bds40BarometricPressureSetting?.toString() || "N/A"
       },
       {
         name: "MCPFCU Mode",
@@ -203,25 +203,25 @@ const Category048: AsterixCategory = {
         name: "TargetAltSource",
         label: "TargetAltSource",
         field: (row: DataRecord048) =>
-          BDS.TargetAltSourcetoString(row.bds40TargetAltSource),
+          BDS.TargetAltSourcetoString(row.bds40TargetAltSource).toString() || "N/A",
       },
-      { name: "Roll Angle", label: "Roll Angle", field: "bds50Roll" },
+      { name: "Roll Angle", label: "Roll Angle", field: (row: DataRecord048) => row.bds50Roll?.toString() || "N/A"},
       {
         name: "True Track Angle",
         label: "True Track Angle",
-        field: "bds50TrueTrack",
+        field: (row: DataRecord048) => row.bds50TrueTrack?.toString() || "N/A"
       },
-      { name: "Ground Speed", label: "Ground Speed", field: "bds50GS" },
+      { name: "Ground Speed", label: "Ground Speed", field: (row: DataRecord048) => row.bds50GS?.toString() || "N/A" },
       {
         name: "Track Angle Rate",
         label: "Track Angle Rate",
-        field: "bds50TrackRate",
+        field: (row: DataRecord048) => row.bds50TrackRate?.toString() || "N/A"
       },
-      { name: "True Air Speed", label: "True Air Speed", field: "bds50TAS" },
+      { name: "True Air Speed", label: "True Air Speed", field: (row: DataRecord048) => row.bds50TAS?.toString() || "N/A" },
       {
         name: "Magnetic Heading",
         label: "Magnetic Heading",
-        field: "bds60MagneticHeading",
+        field: (row: DataRecord048) => row.bds60MagneticHeading?.toString() || "N/A"
       },
       { name: "IAS", label: "IAS", field: "bds60IAS" },
       { name: "MACH", label: "MACH", field: "bds60MACH" },

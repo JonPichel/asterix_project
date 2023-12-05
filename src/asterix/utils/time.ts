@@ -7,7 +7,7 @@ export function secondsSinceMidnightToString(ssm?: number): string {
 
   date.setHours(0, 0, 0, 0) // Set to midnight
   date.setSeconds(ssm)
-  date.setMilliseconds((ssm - Math.trunc(ssm)) * 1000)
+  date.setMilliseconds(Math.ceil((ssm - Math.trunc(ssm)) * 1000));
 
   // Format the time as HH:MM:SS
   const hours = date.getHours().toString().padStart(2, "0")
