@@ -23,6 +23,12 @@ const Category048: AsterixCategory = {
           return rowA.secondsSinceMidnight - rowB.secondsSinceMidnight
         },
       },
+      { name: "latitude", label: "Latitude", field: (row: DataRecord048) => row.gpsCoords?.lat.toFixed(6).toString() || "N/A"},
+      {
+        name: "longitude",
+        label: "Longitude",
+        field: (row: DataRecord048) => row.gpsCoords?.lon.toFixed(6).toString() || "N/A",
+      },
       {
         name: "trtyp",
         label: "TR Type",
@@ -86,12 +92,6 @@ const Category048: AsterixCategory = {
       },
       { name: "rho", label: "RHO (nm)", field: "rho" },
       { name: "theta", label: "THETA (º)", field: "theta" },
-      { name: "latitude", label: "Latitude", field: (row: DataRecord048) => row.gpsCoords?.lat.toFixed(6).toString() || "N/A"},
-      {
-        name: "longitude",
-        label: "Longitude",
-        field: (row: DataRecord048) => row.gpsCoords?.lon.toFixed(6).toString() || "N/A",
-      },
       {
         name: "mode3av",
         label: "Mode3A V",
@@ -106,7 +106,7 @@ const Category048: AsterixCategory = {
       {
         name: "mode3ac",
         label: "Mode3A Code",
-        field: (row: DataRecord048) => row.mode3ACode?.toString(8).padStart(4, "0") ?? "",
+        field: (row: DataRecord048) => row.mode3ACode?.toString(8).padStart(4, "0") ?? "N/A",
       },
 
       {
@@ -128,9 +128,50 @@ const Category048: AsterixCategory = {
         field: "correctedFlightLevel",
       },
       {
-        name: "aircraftaddress",
-        label: "Aircraft Address",
+        name: "radarPlotSRL",
+        label: "Plot SRL",
+        field: (row: DataRecord048) => row.radarPlotSRL?.toFixed(3).toString() || "N/A"
+      },
+      {
+        name: "radarPlotSRR",
+        label: "Plot SRR",
+        field: (row: DataRecord048) => row.radarPlotSRR?.toString() || "N/A"
+      },
+      {
+        name: "radarPlotSAM",
+        label: "Plot SAM",
+        field: (row: DataRecord048) => row.radarPlotSAM?.toString() + " dBm" || "N/A"
+      },
+      {
+        name: "radarPlotPRL",
+        label: "Plot PRL",
+        field: (row: DataRecord048) => row.radarPlotPRL?.toFixed(3).toString() || "N/A"
+      },
+      {
+        name: "radarPlotPAM",
+        label: "Plot PAM",
+        field: (row: DataRecord048) => row.radarPlotPAM?.toString() + " dBm"  || "N/A"
+      },
+      {
+        name: "radarPlotRPD",
+        label: "Plot RPD",
+        field: (row: DataRecord048) => row.radarPlotRPD?.toFixed(3).toString() + " dBm" || "N/A"
+      },
+      {
+        name: "radarPlotAPD",
+        label: "Plot APD",
+        field: (row: DataRecord048) => row.radarPlotAPD?.toFixed(3).toString() + " dBm" || "N/A"
+      },
+      {
+        name: "aircraftid",
+        label: "Aircraft ID",
         field: "aircraftaddress",
+      },
+      {
+        name: "aircraftid",
+        label: "Aircraft ID",
+        field: "aircraftID",
+        sortable: true,
       },
       {
         name: "bds",
@@ -196,6 +237,18 @@ const Category048: AsterixCategory = {
       },
       { name: "tracknumber", label: "Track Number", field: "tracknumber" },
       {
+        name: "Xcomponent",
+        label: "X Component",
+        field: (row: DataRecord048) => row.Xcomponent?.toString() || "N/A"
+      },
+      {
+        name: "Ycomponent",
+        label: "Y Component",
+        field: (row: DataRecord048) => row.Ycomponent?.toString() || "N/A"
+      },
+      { name: "calculatedgroundspeed", label: "Ground Speed kt", field: "calculatedgroundspeed" },
+      { name: "calculatedheading", label: "Heading", field: "calculatedheading" },
+      {
         name: "cnf",
         label: "Confirmed vs Tentative track",
         field: (row: DataRecord048) =>
@@ -228,32 +281,24 @@ const Category048: AsterixCategory = {
       {
         name: "tre",
         label: "Signal for end of track",
-        field: (row: DataRecord048) => TargetReport.TREtoString(row.tre),
+        field: (row: DataRecord048) => TargetReport.TREtoString(row.tre).toString()|| "N/A"
       },
       {
         name: "gho",
         label: "Ghost vs true target",
-        field: (row: DataRecord048) => TargetReport.GHOtoString(row.gho),
+        field: (row: DataRecord048) => TargetReport.GHOtoString(row.gho).toString()|| "N/A"
       },
       {
         name: "sup",
         label: "SUP",
-        field: (row: DataRecord048) => TargetReport.SUPtoString(row.sup),
+        field: (row: DataRecord048) => TargetReport.SUPtoString(row.sup).toString()|| "N/A"
       },
       {
         name: "tcc",
         label: "Type of plot coordinate transformation mechanism",
-        field: (row: DataRecord048) => TargetReport.TCCtoString(row.tcc),
+        field: (row: DataRecord048) => TargetReport.TCCtoString(row.tcc).toString()|| "N/A"
       },
-      { name: "Xcomponent", label: "X-Component", field: "Xcomponent" },
-      { name: "Ycomponent", label: "Y-Component", field: "Ycomponent" },
-      {
-        name: "aircraftid",
-        label: "Aircraft ID",
-        field: "aircraftID",
-        sortable: true,
-      },
-      { name: "h3D", label: "3D height", field: "h3D" },
+      { name: "h3D", label: "3D height", field: (row: DataRecord048) => row.h3D?.toString() || "N/A" },
       {
         name: "COM",
         label: "Transponder communications capability",
@@ -283,6 +328,16 @@ const Category048: AsterixCategory = {
         name: "AIC",
         label: "Aircraft identification Capability",
         field: (row: DataRecord048) => CCF.AICtoString(row.ccfAIC),
+      },
+      {
+        name: "ccfB1A",
+        label: "B1A",
+        field: "ccfB1A",
+      },
+      {
+        name: "ccfB1B",
+        label: "B1B",
+        field: "ccfB1B",
       },
     ]
   },
