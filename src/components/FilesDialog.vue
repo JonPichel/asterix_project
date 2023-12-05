@@ -65,109 +65,11 @@ function removeFiles() {
 function downloadCSV() {
   const tableData = rows;
 
-  const csvData = tableData.value.map(({ gpsCoords, timestamp, ...row }) => {
+  const csvData = tableData.value.map(({ timestamp, ...row }) => {
     
-    if ("secondsSinceMidnight" in row) {
-      row.secondsSinceMidnight = secondsSinceMidnightToString((row as DataRecord048).secondsSinceMidnight)
-    }
-    if ("targetReportType" in row){
-      row.targetReportType = TargetReport.TYPtoString((row as DataRecord048).targetReportType)
-    }
-    if ("targetReportSimulated" in row){
-      row.targetReportSimulated = TargetReport.SIMtoString((row as DataRecord048).targetReportSimulated)
-    }
-    if ("targetReportRDPChain" in row){
-      row.targetReportRDPChain = TargetReport.RDPtoString((row as DataRecord048).targetReportRDPChain)
-    }
-    if ("targetReportSPI" in row){
-      row.targetReportSPI = TargetReport.SPItoString((row as DataRecord048).targetReportSPI)
-    }
-    if ("targetReportRAB" in row){
-      row.targetReportRAB = TargetReport.RABtoString((row as DataRecord048).targetReportRAB)
-    }
-    if ("targetReportExtendedRange" in row){
-      row.targetReportExtendedRange = TargetReport.ERRtoString((row as DataRecord048).targetReportExtendedRange)
-    }
-    if ("targetReportXPulse" in row){
-      row.targetReportXPulse = TargetReport.XPPtoString((row as DataRecord048).targetReportXPulse)
-    }
-    if ("targetReportMilitaryEmergency" in row){
-      row.targetReportMilitaryEmergency = TargetReport.MEtoString((row as DataRecord048).targetReportMilitaryEmergency)
-    }
-    if ("targetReportMilitaryIdentification" in row){
-      row.targetReportMilitaryIdentification = TargetReport.MItoString((row as DataRecord048).targetReportMilitaryIdentification)
-    }
-    if ("targetReportFoeFri" in row){
-      row.targetReportFoeFri = TargetReport.FOEFRItoString((row as DataRecord048).targetReportFoeFri)
-    }
-    if ("mode3AValidated" in row){
-      row.mode3AValidated = Code.ValidatedtoString((row as DataRecord048).mode3AValidated)
-    }
-    if ("mode3AGarbled" in row){
-      row.mode3AGarbled = Code.GarbledtoString((row as DataRecord048).mode3AGarbled)
-    }
-    if ("mode3ACode" in row){
-      row.mode3ACode = (row as DataRecord048).mode3ACode?.toString(8).padStart(4, "0") ?? "N/A"
-    }
-    if ("flightLevelValidated" in row){
-      row.flightLevelValidated = Code.ValidatedtoString((row as DataRecord048).flightLevelValidated)
-    }
-    if ("flightLevelGarbled" in row){
-      row.flightLevelGarbled = Code.GarbledtoString((row as DataRecord048).flightLevelGarbled)
-    }
-    if ("bds40MCPFCUMode" in row){
-      row.bds40MCPFCUMode = BDS.MCPFCUModetoString((row as DataRecord048).bds40MCPFCUMode)
-    }
-    if ("bds40TargetAltSource" in row){
-      row.bds40TargetAltSource = BDS.TargetAltSourcetoString((row as DataRecord048).bds40TargetAltSource)
-    }
-    if ("targetcnf" in row){
-      row.targetcnf = TargetReport.ConfirmedTentavitoString((row as DataRecord048).targetcnf)
-    }
-    if ("targetrad" in row){
-      row.targetrad = TargetReport.TypsensortoString((row as DataRecord048).targetrad)
-    }
-    if ("targetdou" in row){
-      row.targetdou = TargetReport.SignalsLevelsConfidencetoString((row as DataRecord048).targetdou)
-    }
-    if ("targetmah" in row){
-      row.targetmah = TargetReport.ManoeuvreDetectiontoString((row as DataRecord048).targetmah)
-    }
-    if ("targetcdm" in row){
-      row.targetcdm = TargetReport.ClimbingDescendingtoString((row as DataRecord048).targetcdm)
-    }
-    if ("tre" in row){
-      row.tre = TargetReport.TREtoString((row as DataRecord048).tre)
-    }
-    if ("gho" in row){
-      row.gho = TargetReport.GHOtoString((row as DataRecord048).gho)
-    }
-    if ("sup" in row){
-      row.sup = TargetReport.SUPtoString((row as DataRecord048).sup)
-    }
-    if ("tcc" in row){
-      row.tcc = TargetReport.TCCtoString((row as DataRecord048).tcc)
-    }
-    if ("ccfCOM" in row){
-      row.ccfCOM = CCF.COMtoString((row as DataRecord048).ccfCOM)
-    }
-    if ("ccfSTAT" in row){
-      row.ccfSTAT = CCF.STATtoString((row as DataRecord048).ccfSTAT)
-    }
-    if ("ccfSI" in row){
-      row.ccfSI = CCF.SItoString((row as DataRecord048).ccfSI)
-    }
-    if ("ccfMSSC" in row){
-      row.ccfMSSC = CCF.MSSCtoString((row as DataRecord048).ccfMSSC)
-    }
-    if ("ccfARC" in row){
-      row.ccfARC = CCF.ARCtoString((row as DataRecord048).ccfARC)
-    }
-    if ("ccfAIC" in row){
-      row.ccfAIC = CCF.AICtoString((row as DataRecord048).ccfAIC)
-    }
+    row = toCSV(row as DataRecord048)as DataRecord048;
 
-    return row as DataRecord048;
+    return row;
   });
 
   console.log( csvData[0])
@@ -181,6 +83,86 @@ function downloadCSV() {
   document.body.appendChild(tempLink);
   tempLink.click();
   document.body.removeChild(tempLink);
+}
+
+function toCSV(record: DataRecord048): object {
+  const data = {
+    sac: record.sac,
+    sic: record.sic,
+    secondsSinceMidnight: secondsSinceMidnightToString(record.secondsSinceMidnight),
+    lat: record.gpsCoords?.lat.toFixed(6).toString() ?? "N/A",
+    lon: record.gpsCoords?.lon.toFixed(6).toString() ?? "N/A",
+    targetReportType: TargetReport.TYPtoString(record.targetReportType),
+    targetReportSimulated: TargetReport.SIMtoString(record.targetReportSimulated),
+    targetReportRDPChain: TargetReport.RDPtoString(record.targetReportRDPChain),
+    targetReportSPI:  TargetReport.SPItoString(record.targetReportSPI),
+    targetReportRAB: TargetReport.RABtoString(record.targetReportRAB),
+    targetReportTest: record.targetReportTest,
+    targetReportExtendedRange: TargetReport.ERRtoString(record.targetReportExtendedRange),
+    targetReportXPulse: TargetReport.XPPtoString(record.targetReportXPulse),
+    targetReportMilitaryEmergency: TargetReport.MEtoString(record.targetReportMilitaryEmergency),
+    targetReportMilitaryIdentification: TargetReport.MItoString(record.targetReportMilitaryIdentification),
+    targetReportFoeFri: TargetReport.FOEFRItoString(record.targetReportFoeFri),
+    rho: record.rho,
+    theta: record.theta,
+    mode3AValidated: Code.ValidatedtoString(record.mode3AValidated),
+    mode3AGarbled: Code.GarbledtoString(record.mode3AGarbled),
+    mode3ACode: record.mode3ACode?.toString(8).padStart(4, "0") ?? "N/A",
+    flightLevelValidated: Code.ValidatedtoString(record.flightLevelValidated),
+    flightLevelGarbled: Code.GarbledtoString(record.flightLevelGarbled),
+    flightLevel: record.flightLevel?.toString() ?? "N/A",
+    correctedFlightLevel: record.correctedFlightLevel,
+    radarPlotSRL: record.radarPlotSRL?.toString() ?? "N/A",
+    radarPlotSRR: record.radarPlotSRR?.toString() ?? "N/A",
+    radarPlotSAM: record.radarPlotSAM?.toString() + " dBm" ?? "N/A",
+    radarPlotPRL: record.radarPlotPRL?.toFixed(3).toString() ?? "N/A",
+    radarPlotPAM: record.radarPlotPAM?.toString() + " dBm"  ?? "N/A",
+    radarPlotRPD: record.radarPlotRPD?.toFixed(3).toString() + " dBm" ?? "N/A",
+    radarPlotAPD: record.radarPlotAPD?.toFixed(3).toString() + " dBm" ?? "N/A",
+    aircraftaddress: record.aircraftaddress,
+    aircraftid: record.aircraftID,
+    bds: record.bds?.join(" ") ?? "",
+    bds40MCPFCUSelectedAltitude: record.bds40MCPFCUSelectedAltitude?.toString() ?? "N/A",
+    bds40FMSSelectedAltitude: record.bds40FMSSelectedAltitude?.toString() ?? "N/A",
+    bds40BarometricPressureSetting: record.bds40BarometricPressureSetting?.toString() ?? "N/A",
+    bds40MCPFCUMode: BDS.MCPFCUModetoString(record.bds40MCPFCUMode),
+    bds40TargetAltSource: BDS.TargetAltSourcetoString(record.bds40TargetAltSource).toString(),
+    bds50Roll: record.bds50Roll?.toString() ?? "N/A",
+    bds50TrueTrack: record.bds50TrueTrack?.toString() ?? "N/A",
+    bds50GS: record.bds50GS?.toString() ?? "N/A",
+    bds50TrackRate: record.bds50TrackRate?.toString() ?? "N/A",
+    bds50TAS: record.bds50TAS?.toString() ?? "N/A",
+    bds60MagneticHeading: record.bds60MagneticHeading?.toString() ?? "N/A",
+    bds60IAS: record.bds60IAS,
+    bds60MACH: record.bds60MACH,
+    bds60BarometricAltitudeRate: record.bds60BarometricAltitudeRate,
+    bds60InertialVerticalVelocity: record.bds60InertialVerticalVelocity,
+    tracknumber: record.tracknumber,
+    Xcomponent: record.Xcomponent?.toString() ?? "N/A",
+    Ycomponent: record.Ycomponent?.toString() ?? "N/A",
+    calculatedgroundspeed: record.calculatedgroundspeed,
+    calculatedheading: record.calculatedheading,
+    targetcnf: TargetReport.ConfirmedTentavitoString(record.targetcnf),
+    targetrad: TargetReport.TypsensortoString(record.targetrad),
+    targetdou: TargetReport.SignalsLevelsConfidencetoString(record.targetdou),
+    targetmah: TargetReport.ManoeuvreDetectiontoString(record.targetmah),
+    targetcdm: TargetReport.ClimbingDescendingtoString(record.targetcdm),
+    tre: TargetReport.TREtoString(record.tre),
+    gho: TargetReport.GHOtoString(record.gho),
+    sup: TargetReport.SUPtoString(record.sup),
+    tcc: TargetReport.TCCtoString(record.tcc),
+    h3D: record.h3D?.toString() ?? "N/A",
+    ccfCOM: CCF.COMtoString(record.ccfCOM),
+    ccfSTAT: CCF.STATtoString(record.ccfSTAT),
+    ccfSI: CCF.SItoString(record.ccfSI),
+    ccfMSSC: CCF.MSSCtoString(record.ccfMSSC),
+    ccfARC: CCF.ARCtoString(record.ccfARC),
+    ccfAIC: CCF.AICtoString(record.ccfAIC),
+    ccfB1A: "BDS 1.0 bit 16 = " + record.ccfB1A?.toString() ?? "N/A",
+    ccfB1B: "BDS 1.0 bits 37/40 = " + record.ccfB1B?.toString(2).padStart(4, "0") ?? "N/A",
+  }
+
+  return data
 }
 </script>
 
