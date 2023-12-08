@@ -19,6 +19,7 @@ type DataRecord048 struct {
 	SecondsSinceMidnight float32 // s
 	// I048/020 (Without Second Extension)
 	Has020 bool
+	Has0202 bool
 	TargetReportType uint8
 	TargetReportSimulated bool
 	TargetReportRDPChain uint8 // 1 or 2
@@ -253,6 +254,7 @@ func (r *DataRecord048) parse020(buf []byte) (int, error) {
 	r.TargetReportRAB = ((buf[0] >> 1) & 0b1) == 1
 
 	if resultFX.fieldLen > 1 {
+		r.Has0202 = true
 		r.TargetReportTest = ((buf[1] >> 7) & 0b1) == 1
 		r.TargetReportXRange = ((buf[1] >> 6) & 0b1) == 1
 		r.TargetReportXPulse = ((buf[1] >> 5) & 0b1) == 1

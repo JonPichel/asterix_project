@@ -158,6 +158,9 @@ func writeCSV(w io.Writer, records []DataRecord048) error {
 			row[8] = r.TargetReportRDPChainStr()
 			row[9] = r.TargetReportSPIStr()
 			row[10] = r.TargetReportRABStr()
+		}
+
+		if r.Has0202 {
 			row[11] = r.TargetReportTestStr()
 			row[12] = r.TargetReportXRangeStr()
 			row[13] = r.TargetReportXPulseStr()
