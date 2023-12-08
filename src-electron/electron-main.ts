@@ -1,12 +1,13 @@
-import { app, BrowserWindow, dialog, ipcMain } from "electron"
+import { app, BrowserWindow, dialog } from "electron"
 import path from "path"
 import os from "os"
-import { spawn } from "child_process"
+import { ChildProcess, spawn } from "child_process"
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform()
 
 let mainWindow: BrowserWindow | undefined
+let serverProcess: ChildProcess
 
 function createWindow() {
   /**
@@ -28,15 +29,11 @@ function createWindow() {
 
   mainWindow.loadURL(process.env.APP_URL)
 
-  const serverProcess = spawn("./asterixdecoder.exe")
+  serverProcess = spawn("./asterixdecoder.exe")
 
   serverProcess.on("error", (err) => {
     console.error(`Error spawning process: ${err.message}`)
     dialog.showErrorBox("Error", `Error spawning process: ${err.message}`)
-  })
-
-  serverProcess.stdout.on("data", (data) => {
-    console.log("FROM BACKEND", data.toString())
   })
 
   if (process.env.DEBUGGING) {
@@ -56,6 +53,10 @@ function createWindow() {
 
 app.whenReady().then(() => {
   createWindow()
+
+  app.on("before-quit", () => {
+    serverProcess.kill("SIGTERM")
+  })
 })
 
 app.on("window-all-closed", () => {

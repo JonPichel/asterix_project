@@ -10,8 +10,8 @@ export const useFileStore = defineStore("files", () => {
   const loadedFiles = ref<LoadedFile[]>([])
   const selectedFile = ref<LoadedFile | null>(null)
 
-  function getFiles() {
-    fetch("http://localhost:5757/list", {
+  async function getFiles(filename?: string) {
+    await fetch("http://localhost:5757/list", {
       method: "GET",
     })
       .then((response) => {

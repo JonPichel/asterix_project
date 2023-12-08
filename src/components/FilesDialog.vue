@@ -103,7 +103,9 @@ function selectFile(file: LoadedFile) {
 
 function addFiles(event: Event) {
   const formData = new FormData()
-  formData.append("file", (event.target as HTMLInputElement).files![0])
+  const file = (event.target as HTMLInputElement).files![0]
+  formData.append("file", file)
+  const filename = file.name
 
   fetch("http://localhost:5757/upload", {
     method: "POST",
@@ -114,9 +116,17 @@ function addFiles(event: Event) {
     }
 
     return response.json()
-  }).then(data => {
+  }).then(async data => {
     console.log("File uploaded successfully:", data)
-    fileStore.getFiles()
+    await fileStore.getFiles()
+        if (filename !== undefined) {
+          const toSelect = fileStore.loadedFiles.find(
+            value => value.filename === filename
+          )
+          if (toSelect !== undefined) {
+            selectFile(toSelect)
+          }
+        }
   }).catch(error => {
     console.error("File upload failed:", error)
   })

@@ -42,7 +42,6 @@ const PATH_SYMBOL_3D = new LineSymbol3D({
 })
 
 function getVisibleRoute(route: RoutePoint[], timestamp: number) {
-  // TODO: binary search
   if (
     route[0].timestamp > timestamp ||
     route[route.length - 1].timestamp + 10_000 < timestamp
