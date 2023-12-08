@@ -144,10 +144,17 @@ export class RadarPosition {
   }
 
   polarToGPS(polar: PolarCoords): GPSCoords {
+    const a = 6378137
+    const H = polar.z
+    const h = this.coords.alt
+    const elevation = Math.asin(
+      (2 * a * (H - h) + H * H - h * h - polar.rho * polar.rho) /
+        (2 * polar.rho * (a + h))
+    )
     const cartesian: CartesianCoords = {
-      x: polar.rho * Math.sin(polar.theta),
-      y: polar.rho * Math.cos(polar.theta),
-      z: polar.z,
+      x: polar.rho * Math.sin(polar.theta) * Math.cos(elevation),
+      y: polar.rho * Math.cos(polar.theta) * Math.cos(elevation),
+      z: polar.rho * Math.sin(elevation),
     }
     return this.cartesianToGPS(cartesian)
   }

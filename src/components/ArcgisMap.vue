@@ -2,13 +2,7 @@
 import { onMounted, onBeforeUnmount } from "vue"
 
 import { ArcgisMap } from "src/esri/map"
-import { DataRecord } from "src/asterix"
-import { point } from "@turf/helpers";
-import { GPSCoords } from "src/coords";
-import { gpsCoords } from "src/asterix/cat048/coords";
-import { profileEnd } from "console";
-import { watchFile } from "fs";
-import { Aircraft } from "src/esri/PlaneLayer";
+import { Aircraft } from "src/esri/PlaneLayer"
 
 
 let map: ArcgisMap
@@ -22,11 +16,12 @@ onBeforeUnmount(() => {
 })
 
 defineExpose({
-  addToMap(records: DataRecord[]) {
-    map.addDataRecords(records)
+  addToMap(aircrafts: Aircraft[]) {
+    map.addAircrafts(aircrafts)
   }
 }) 
-//KML
+
+/*
 function convertirKML() {
   let kml = `
     <Folder> 
@@ -49,7 +44,7 @@ function convertirKML() {
           <altitudeMode>absolute</altitudeMode>
           <coordinates>
     `;
-    for (const  record of aircraft.records) {
+    for (const  record of aircraft.route) {
       const coords = record.gpsCoords
       if(coords)
       kml += `${coords.lon},${coords.lat},${coords.alt} `;
@@ -77,12 +72,13 @@ function convertirKML() {
   // Eliminar el enlace del documento
   document.body.removeChild(link);
 }
+*/
 </script>
 
 <template>
   <div id="viewDiv"></div>
   <div id="sliderDiv">
-    <q-btn round icon="download" size="sm" @click="convertirKML" />
+    <!--<q-btn round icon="download" size="sm" @click="convertirKML" />-->
   </div>
 </template>
 

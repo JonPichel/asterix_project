@@ -8,6 +8,7 @@ export function gpsCoords(record: DataRecord048): GPSCoords | null {
         return value === undefined || value === null
       }
     )
+    // Modo 3A 7777
   ) {
     return null
   }

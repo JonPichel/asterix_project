@@ -59,6 +59,7 @@ export function fromBinary(buffer: Uint8Array): DataRecord {
         fieldStart += parse170(record, dataFieldsBuffer.slice(fieldStart))
         break
       case 19:
+        // TODO: check we left break behind
         fieldStart += parse110(record, dataFieldsBuffer.slice(fieldStart))
       case 21:
         fieldStart += parse230(record, dataFieldsBuffer.slice(fieldStart))
@@ -402,8 +403,11 @@ function parse042(record: DataRecord048, buffer: Uint8Array): number {
 }
 
 function parse200(record: DataRecord048, buffer: Uint8Array): number {
-  record.calculatedgroundspeed = ((buffer[0] << 8) | (buffer[1]))* 0.22
-  record.calculatedheading = +(((buffer[2] << 8) | (buffer[3]))*(360 / 65536)).toFixed(4)
+  record.calculatedgroundspeed = ((buffer[0] << 8) | buffer[1]) * 0.22
+  record.calculatedheading = +(
+    ((buffer[2] << 8) | buffer[3]) *
+    (360 / 65536)
+  ).toFixed(4)
   return 4
 }
 
@@ -440,8 +444,8 @@ function parse230(record: DataRecord048, buffer: Uint8Array): number {
   record.ccfMSSC = buffer[1] >> 7 === 1
   record.ccfARC = ((buffer[1] >> 6) & 0b1) === 1
   record.ccfAIC = ((buffer[1] >> 5) & 0b1) === 1
-  record.ccfB1A = ((buffer[1] >> 4) & 0b1)
-  record.ccfB1B = (buffer[1] & 0b1111)
+  record.ccfB1A = (buffer[1] >> 4) & 0b1
+  record.ccfB1B = buffer[1] & 0b1111
 
   return 2
 }

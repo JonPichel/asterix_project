@@ -1,29 +1,33 @@
 import RotationVariable from "@arcgis/core/renderers/visualVariables/RotationVariable"
 import { Point, Polyline } from "@arcgis/core/geometry"
 
-import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer"
 import Graphic from "@arcgis/core/Graphic"
-import SimpleLineSymbol from "@arcgis/core/symbols/SimpleLineSymbol"
 import LineSymbol3D from "@arcgis/core/symbols/LineSymbol3D"
 import LineSymbol3DLayer from "@arcgis/core/symbols/LineSymbol3DLayer"
 import { ArcgisMap, SPATIAL_REFERENCE } from "./map"
 import PictureMarkerSymbol from "@arcgis/core/symbols/PictureMarkerSymbol"
-import { DataRecord } from "src/asterix"
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer"
 import SimpleRenderer from "@arcgis/core/renderers/SimpleRenderer"
 import TimeExtent from "@arcgis/core/TimeExtent"
+
+export interface RoutePoint {
+  timestamp: number
+  lat: number
+  lon: number
+  alt: number
+}
+
+export interface Aircraft {
+  id: string
+  route: RoutePoint[]
+  added: boolean
+}
 
 const PLANE_SYMBOL_2D = new PictureMarkerSymbol({
   url: "assets/plane-black.svg",
   width: 20,
   height: 20,
   angle: 270,
-})
-
-// eslint-disable-next-line
-const PATH_SYMBOL_2D = new SimpleLineSymbol({
-  color: [0, 152, 255],
-  width: 3,
 })
 
 const PATH_SYMBOL_3D = new LineSymbol3D({
@@ -37,24 +41,31 @@ const PATH_SYMBOL_3D = new LineSymbol3D({
   ],
 })
 
-function getVisibleRecords(records: DataRecord[], timestamp: number) {
-  const index = records.findIndex((record) => record.timestamp! > timestamp)
-  if (index === 0) {
-    // First record of the aircraft hasn't arrived yet
+function getVisibleRoute(route: RoutePoint[], timestamp: number) {
+  // TODO: binary search
+  if (
+    route[0].timestamp > timestamp ||
+    route[route.length - 1].timestamp + 10_000 < timestamp
+  )
     return []
+  if (route[route.length - 1].timestamp <= timestamp) return route
+
+  let low = 0
+  let high = route.length - 1
+  let index = 0
+  let j = 0
+  while (low <= high) {
+    j++
+    const mid = Math.floor((low + high) / 2)
+    if (route[mid].timestamp <= timestamp) {
+      index = mid
+      low = mid + 1
+    } else {
+      high = mid - 1
+    }
   }
 
-  if (index === -1) {
-    return records
-  } else {
-    return records.slice(0, index)
-  }
-}
-
-export type Aircraft = {
-  aircraftID: string
-  records: DataRecord[]
-  added: boolean
+  return route.slice(0, index)
 }
 
 export default class PlaneLayer {
@@ -67,6 +78,8 @@ export default class PlaneLayer {
   modelLayer!: FeatureLayer
   pathLayer!: FeatureLayer
 
+  showPaths = false
+
   constructor(map: ArcgisMap) {
     this.map = map
 
@@ -74,57 +87,27 @@ export default class PlaneLayer {
     this.initPaths()
   }
 
-  loadData(records: DataRecord[]): TimeExtent {
-    // Classify the records by aircraftID
-    let currentTimestamp = this.timestamp
-    const useMaxTimestamp = currentTimestamp === -1
+  togglePaths() {
+    this.showPaths = !this.showPaths
+  }
 
-    for (const record of records) {
-      const aircraftID = record.aircraftID
-      const timestamp = record.timestamp
-      const coords = record.gpsCoords
-      if (
-        aircraftID === undefined ||
-        timestamp === undefined ||
-        coords === undefined
-      ) {
-        continue
-      }
+  loadData(aircrafts: Aircraft[]): TimeExtent {
+    this.aircrafts = aircrafts
 
-      if (!this.aircraftIndex.has(aircraftID)) {
-        this.aircraftIndex.set(aircraftID, this.aircrafts.length)
-        this.aircrafts.push({
-          aircraftID,
-          records: [],
-          added: false,
-        })
-      }
-
-      // Compute maximum timestamp
-      if (useMaxTimestamp && timestamp > currentTimestamp) {
-        currentTimestamp = timestamp
-      }
-
-      const index = this.aircraftIndex.get(aircraftID)!
-      this.aircrafts[index].records.push(record)
-    }
-
-    let start = this.aircrafts[0].records[0].timestamp!
+    let start = this.aircrafts[0].route[0].timestamp
     let end = start
     for (let i = 0; i < this.aircrafts.length; i++) {
       const aircraft = this.aircrafts[i]
-      // Sort each plane's records by timestamp
-      aircraft.records.sort((a, b) => a.timestamp! - b.timestamp!)
 
-      if (aircraft.records[0].timestamp! < start) {
-        start = aircraft.records[0].timestamp!
+      if (aircraft.route[0].timestamp! < start) {
+        start = aircraft.route[0].timestamp!
       }
-      if (aircraft.records[aircraft.records.length - 1].timestamp! > end) {
-        end = aircraft.records[aircraft.records.length - 1].timestamp!
+      if (aircraft.route[aircraft.route.length - 1].timestamp! > end) {
+        end = aircraft.route[aircraft.route.length - 1].timestamp!
       }
+
+      aircraft.added = false
     }
-
-    //this.update(currentTimestamp)
 
     return new TimeExtent({
       start,
@@ -167,6 +150,18 @@ export default class PlaneLayer {
           name: "timestamp",
           type: "date",
         },
+        {
+          name: "lat",
+          type: "double",
+        },
+        {
+          name: "lon",
+          type: "double",
+        },
+        {
+          name: "alt",
+          type: "double",
+        },
       ],
       popupTemplate: {
         title: "{aircraftID}",
@@ -190,6 +185,21 @@ export default class PlaneLayer {
               {
                 fieldName: "timestamp",
                 label: "timestamp",
+                visible: true,
+              },
+              {
+                fieldName: "lat",
+                label: "latitude",
+                visible: true,
+              },
+              {
+                fieldName: "lon",
+                label: "longitude",
+                visible: true,
+              },
+              {
+                fieldName: "alt",
+                label: "altitude",
                 visible: true,
               },
             ],
@@ -235,16 +245,22 @@ export default class PlaneLayer {
     const updatedPaths: Graphic[] = []
     for (let i = 0; i < this.aircrafts.length; i++) {
       const aircraft = this.aircrafts[i]
-      const visible = getVisibleRecords(aircraft.records, timestamp)
+      const visible = getVisibleRoute(aircraft.route, timestamp)
+      if (i < 5) {
+        console.log(aircraft.id, timestamp, visible.length)
+      }
       if (!visible.length) {
         if (aircraft.added) {
           // Delete aircraft graphics
           deletedModels.push({
             objectId: i,
           })
-          deletedPaths.push({
-            objectId: i,
-          })
+          if (this.showPaths) {
+            deletedPaths.push({
+              objectId: i,
+            })
+          }
+          aircraft.added = false
         }
         continue
       }
@@ -253,50 +269,60 @@ export default class PlaneLayer {
       const current = visible[visible.length - 1]
       const modelGraphic = new Graphic({
         geometry: new Point({
-          latitude: current.gpsCoords!.lat,
-          longitude: current.gpsCoords!.lon,
-          z: current.gpsCoords!.alt,
+          latitude: current.lat,
+          longitude: current.lon,
+          z: current.alt,
           hasZ: true,
         }),
         attributes: {
           objectID: i,
-          aircraftID: aircraft.aircraftID,
+          aircraftID: aircraft.id,
           heading: 0,
-          timestamp: current.timestamp!,
+          timestamp: current.timestamp,
+          lat: current.lat,
+          lon: current.lon,
+          alt: current.alt,
         },
       })
       // Path graphic
-      const path = visible.map(
-        (record) =>
-          new Point({
-            spatialReference: SPATIAL_REFERENCE,
-            latitude: record.gpsCoords!.lat,
-            longitude: record.gpsCoords!.lon,
-            z: record.gpsCoords!.alt,
-            hasZ: true,
-          })
-      )
-      const polyline = new Polyline({
-        spatialReference: SPATIAL_REFERENCE,
-        hasZ: true,
-      })
-      polyline.addPath(path)
-      const pathGraphic = new Graphic({
-        geometry: polyline,
-        attributes: {
-          objectID: i,
-        },
-      })
+      let pathGraphic: Graphic
+      if (this.showPaths) {
+        const path = visible.map(
+          (routePoint) =>
+            new Point({
+              spatialReference: SPATIAL_REFERENCE,
+              latitude: routePoint.lat,
+              longitude: routePoint.lon,
+              z: routePoint.alt,
+              hasZ: true,
+            })
+        )
+        const polyline = new Polyline({
+          spatialReference: SPATIAL_REFERENCE,
+          hasZ: true,
+        })
+        polyline.addPath(path)
+        pathGraphic = new Graphic({
+          geometry: polyline,
+          attributes: {
+            objectID: i,
+          },
+        })
+      }
 
       if (!aircraft.added) {
         // Add aircraft graphics
         addedModels.push(modelGraphic)
-        addedPaths.push(pathGraphic)
+        if (this.showPaths) {
+          addedPaths.push(pathGraphic!)
+        }
         aircraft.added = true
       } else {
         // Update aircraft graphics
         updatedModels.push(modelGraphic)
-        updatedPaths.push(pathGraphic)
+        if (this.showPaths) {
+          updatedPaths.push(pathGraphic!)
+        }
       }
     }
 
@@ -306,10 +332,12 @@ export default class PlaneLayer {
       updateFeatures: updatedModels,
     })
 
-    this.pathLayer.applyEdits({
-      addFeatures: addedPaths,
-      deleteFeatures: deletedPaths,
-      updateFeatures: updatedPaths,
-    })
+    if (this.showPaths) {
+      this.pathLayer.applyEdits({
+        addFeatures: addedPaths,
+        deleteFeatures: deletedPaths,
+        updateFeatures: updatedPaths,
+      })
+    }
   }
 }

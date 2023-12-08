@@ -12,7 +12,7 @@ import { RADAR_BCN } from "./locations"
 import "@arcgis/core/assets/esri/themes/dark/main.css"
 
 import { DataRecord } from "src/asterix"
-import PlaneLayer from "./PlaneLayer"
+import PlaneLayer, { Aircraft } from "./PlaneLayer"
 
 export const SPATIAL_REFERENCE = new SpatialReference({
   wkid: 102100,
@@ -51,7 +51,7 @@ export class ArcgisMap {
     this.map.add(layer)
   }
 
-  async addDataRecords(records: DataRecord[]) {
+  async addAircrafts(aircrafts: Aircraft[]) {
     if (this.timeSlider !== null) {
       this.timeSlider.stop()
     } else {
@@ -75,7 +75,7 @@ export class ArcgisMap {
       })
     }
 
-    const timeExtent = this.planeLayer.loadData(records)
+    const timeExtent = this.planeLayer.loadData(aircrafts)
     this.timeSlider.fullTimeExtent = timeExtent
   }
 
