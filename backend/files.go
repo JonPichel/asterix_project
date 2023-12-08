@@ -55,6 +55,8 @@ func uploadHandler(c *gin.Context) {
 
 	recordsLoaded = records
 	c.JSON(http.StatusOK, gin.H{"count": len(records)})
+
+	go persistData()
 }
 
 type listResponse struct {

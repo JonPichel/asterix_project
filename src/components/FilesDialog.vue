@@ -9,7 +9,6 @@ import Papa from "papaparse"
 
 import { QTable, QTableProps } from "quasar"
 import DataRecord048 from "src/asterix/cat048/record"
-import { A } from "app/dist/electron/UnPackaged/assets/index.4b8dfcc6"
 
 const fileStore = useFileStore()
 
