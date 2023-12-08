@@ -407,10 +407,10 @@ func (r *DataRecord048) parse250(buf []byte) (int, error) {
 				if (data[0] >> 7) & 0b1 == 1 {
 					if (data[0] >> 6) & 0b1 == 1 {
 						// Negative sign
-						r.Roll = -(90 - float32((int(data[0] & 0b111111) << 3) | int(data[0] >> 5)) * 45 / 256) // º
+						r.Roll = -(90 - float32((int(data[0] & 0b111111) << 3) | int(data[1] >> 5)) * 45 / 256) // º
 					} else {
 						// Positive sign
-						r.Roll = float32((int(data[0] & 0b111111) << 3) | int(data[0] >> 5)) * 45 / 256 // º
+						r.Roll = float32((int(data[0] & 0b111111) << 3) | int(data[1] >> 5)) * 45 / 256 // º
 					}
 
 					r.BDSFields |= 1 << 5

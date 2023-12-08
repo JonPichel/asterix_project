@@ -28,7 +28,7 @@ function createWindow() {
 
   mainWindow.loadURL(process.env.APP_URL)
 
-  const serverProcess = spawn("./backend/asterixdecoder")
+  const serverProcess = spawn("./asterixdecoder.exe")
 
   serverProcess.on("error", (err) => {
     console.error(`Error spawning process: ${err.message}`)
