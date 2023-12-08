@@ -27,6 +27,9 @@ func main() {
 	r.DELETE("/delete/:filename", deleteHandler)
 	r.GET("/simData", simulationDataHandler)
 
+	r.POST("/csv/:filename", csvHandler)
+	r.POST("/kml/:filename", KMLHandler)
+
 	r.POST("/records", recordsHandler)
 	r.Run(":5757")
 }

@@ -4,10 +4,42 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
+	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
+
+func csvHandler(c *gin.Context) {
+	filename := c.Param("filename")
+
+	if !strings.HasSuffix(filename, ".ast") {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file extension. Only .ast files are allowed."})
+		return
+	}
+
+	if isFileSaved(filename) == -1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "File not loaded"})
+		return
+	}
+
+	csvPath := filepath.Join(CSV_DIR, strings.TrimSuffix(filename, ".ast")) + ".csv"
+	file, err := os.Create(csvPath)
+	if err != nil {
+		fmt.Println("Error opening file:", err)
+		return
+	}
+	defer file.Close()
+
+	if err := writeCSV(file, recordsLoaded); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error writing csv file"})
+		return
+	}
+}
 
 func writeCSV(w io.Writer, records []DataRecord048) error {
 	csvWriter := csv.NewWriter(w)

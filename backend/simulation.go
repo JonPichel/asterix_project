@@ -15,6 +15,4 @@ func simulationDataHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, simulationDataResponse{
 		Aircrafts: aircrafts,
 	})
-
-
 }
