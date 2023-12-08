@@ -44,7 +44,6 @@ func parseAircrafts(records []DataRecord048) []Aircraft {
 			})
 		}
 
-		// TODO: set timestamp
 		duration := time.Duration(r.SecondsSinceMidnight*1000 * float32(time.Millisecond))
 		now := time.Now()
 		midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)

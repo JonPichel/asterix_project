@@ -518,7 +518,6 @@ func (r *DataRecord048) parse200(buf []byte) (int, error) {
 	return 4, nil
 }
 
-// TODO: da peor algunos campos girados
 func (r *DataRecord048) parse170(buf []byte) (int, error) {
 	resultFX := checkFX(buf)
 
@@ -550,7 +549,7 @@ func (r *DataRecord048) parse110(buf []byte) (int, error) {
 func (r *DataRecord048) parse230(buf []byte) (int, error) {
 	r.CapabilityCOM = buf[0] >> 5
 	r.FlightStatus = (buf[0] >> 2) & 0b111
-	r.CapabilitySI = (buf[0] >> 1) & 0b1 == 1
+	r.CapabilitySI = (buf[0] >> 1) & 0b1 == 0
 	r.CapabilityMSSC = buf[1] >> 7 == 1
 	r.CapabilityARC = (buf[1] >> 6) & 0b1 == 1
 	r.CapabilityAIC = (buf[1] >> 5) & 0b1 == 1
