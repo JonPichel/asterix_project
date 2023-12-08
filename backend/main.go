@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -12,6 +13,7 @@ import (
 
 func main() {
 	//test()
+	handleSignals()
 	retrieveData()
 
 	r := gin.Default()
@@ -34,30 +36,17 @@ func main() {
 	r.Run(":5757")
 }
 
-func test() {
-	file, err := os.Open("230502-est-080001_BCN_60MN_08_09.ast")
+func handleSignals() {
+	signalCh := make(chan os.Signal, 1)
+	signal.Notify(signalCh, syscall.SIGTERM, syscall.SIGINT)
 
-	if err != nil {
-		fmt.Println("Error opening file:", err)
-		return
-	}
-	defer file.Close()
-
-	buf, err := ioutil.ReadAll(file)
-	if err != nil {
-		fmt.Println("Error reading file:", err)
-		return
-	}
-
-	records := DecodeFile(buf)
-
-	csvFile, err := os.Create("test.csv")
-	if err != nil {
-		panic(err)
-	}
-	defer csvFile.Close()
-
-	if err := writeCSV(csvFile, records); err != nil {
-		panic(err)
-	}
+	go func() {
+		<-signalCh
+		fmt.Println("PERSISTING DATA")
+		if err := persistData(); err != nil {
+			os.Exit(1)
+		} else {
+			os.Exit(0)
+		}
+	}()
 }

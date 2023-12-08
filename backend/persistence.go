@@ -122,16 +122,8 @@ func saveAsterix(filename string, count int, src io.Reader) error {
 
 func fileOK(file SavedFile) bool {
 	asterixPath := filepath.Join(ASTERIX_DIR, file.Filename)
-	csvPath := filepath.Join(CSV_DIR, strings.TrimSuffix(file.Filename, ".ast")) + ".csv"
-	kmlPath := filepath.Join(KML_DIR, strings.TrimSuffix(file.Filename, ".ast")) + ".kml"
 
 	if _, err := os.Stat(asterixPath); os.IsNotExist(err) {
-		return false
-	}
-	if _, err := os.Stat(csvPath); os.IsNotExist(err) {
-		return false
-	}
-	if _, err := os.Stat(kmlPath); os.IsNotExist(err) {
 		return false
 	}
 	return true

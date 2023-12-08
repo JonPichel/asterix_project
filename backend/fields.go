@@ -61,7 +61,6 @@ func (r DataRecord048) TargetReportTestStr() string {
 }
 
 func (r DataRecord048) TargetReportXRangeStr() string {
-	// TODO: check
 	if r.TargetReportXRange {
 		return "Yes"
 	} else {
@@ -258,7 +257,6 @@ func (r DataRecord048) FlightStatusStr() string {
 	return ""
 }
 
-// TODO: check
 func (r DataRecord048) CapabilitySIStr() string {
 	if r.CapabilitySI {
 		return "SI"
