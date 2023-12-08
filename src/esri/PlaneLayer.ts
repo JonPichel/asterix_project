@@ -70,7 +70,6 @@ function getVisibleRoute(route: RoutePoint[], timestamp: number) {
 
 export default class PlaneLayer {
   map: ArcgisMap
-  timestamp = -1
 
   aircrafts: Aircraft[] = []
   aircraftIndex: Map<string, number> = new Map()
@@ -109,6 +108,67 @@ export default class PlaneLayer {
       aircraft.added = false
     }
 
+    const addedModels: Graphic[] = []
+    const addedPaths: Graphic[] = []
+    for (let i = 0; i < aircrafts.length; i++) {
+      const aircraft = aircrafts[i]
+      const current = aircraft.route[aircraft.route.length - 1]
+
+      const modelGraphic = new Graphic({
+        geometry: new Point({
+          latitude: current.lat,
+          longitude: current.lon,
+          z: current.alt,
+          hasZ: true,
+        }),
+        attributes: {
+          OBJECTID: i,
+          aircraftID: aircraft.id,
+          heading: 0,
+          timestamp: current.timestamp,
+          lat: current.lat,
+          lon: current.lon,
+          alt: current.alt,
+          added: 0,
+        },
+      })
+
+      // Path graphic
+      const path = aircraft.route.map(
+        (routePoint) =>
+          new Point({
+            spatialReference: SPATIAL_REFERENCE,
+            latitude: routePoint.lat,
+            longitude: routePoint.lon,
+            z: routePoint.alt,
+            hasZ: true,
+          })
+      )
+
+      const polyline = new Polyline({
+        spatialReference: SPATIAL_REFERENCE,
+        hasZ: true,
+      })
+      polyline.addPath(path)
+      const pathGraphic = new Graphic({
+        geometry: polyline,
+        attributes: {
+          OBJECTID: i,
+          added: 0,
+        },
+      })
+
+      addedModels.push(modelGraphic)
+      addedPaths.push(pathGraphic)
+    }
+
+    this.modelLayer.applyEdits({
+      addFeatures: addedModels,
+    })
+    this.pathLayer.applyEdits({
+      addFeatures: addedPaths,
+    })
+
     return new TimeExtent({
       start,
       end,
@@ -117,6 +177,7 @@ export default class PlaneLayer {
 
   initModels() {
     this.modelLayer = new FeatureLayer({
+      definitionExpression: "added = 1",
       title: "Planes",
       spatialReference: SPATIAL_REFERENCE,
       hasZ: true,
@@ -131,11 +192,10 @@ export default class PlaneLayer {
           }),
         ],
       }),
-      objectIdField: "objectID",
+      objectIdField: "OBJECTID",
       fields: [
         {
-          name: "objectID",
-          alias: "ObjectID",
+          name: "OBJECTID",
           type: "oid",
         },
         {
@@ -162,9 +222,13 @@ export default class PlaneLayer {
           name: "alt",
           type: "double",
         },
+        {
+          name: "added",
+          type: "integer",
+        },
       ],
       popupTemplate: {
-        title: "{aircraftID}",
+        title: "{aircraftID} {OBJECTID}",
         content: [
           {
             type: "fields",
@@ -179,7 +243,7 @@ export default class PlaneLayer {
               },
               {
                 fieldName: "aircraftID",
-                label: "Aircraft ID",
+                label: "Aircraft Address",
                 visible: true,
               },
               {
@@ -214,6 +278,7 @@ export default class PlaneLayer {
   initPaths() {
     this.pathLayer = new FeatureLayer({
       title: "Paths",
+      definitionExpression: "added = 1",
       spatialReference: SPATIAL_REFERENCE,
       hasZ: true,
       source: [],
@@ -221,12 +286,15 @@ export default class PlaneLayer {
       renderer: new SimpleRenderer({
         symbol: PATH_SYMBOL_3D,
       }),
-      objectIdField: "objectID",
+      objectIdField: "OBJECTID",
       fields: [
         {
-          name: "objectID",
-          alias: "ObjectID",
+          name: "OBJECTID",
           type: "oid",
+        },
+        {
+          name: "added",
+          type: "integer",
         },
       ],
     })
@@ -235,30 +303,32 @@ export default class PlaneLayer {
   }
 
   update(timestamp: number) {
-    this.timestamp = timestamp
-
-    const addedModels: Graphic[] = []
-    const deletedModels: { objectId: number }[] = []
     const updatedModels: Graphic[] = []
-    const addedPaths: Graphic[] = []
-    const deletedPaths: { objectId: number }[] = []
     const updatedPaths: Graphic[] = []
     for (let i = 0; i < this.aircrafts.length; i++) {
       const aircraft = this.aircrafts[i]
       const visible = getVisibleRoute(aircraft.route, timestamp)
-      if (i < 5) {
-        console.log(aircraft.id, timestamp, visible.length)
-      }
+
       if (!visible.length) {
         if (aircraft.added) {
-          // Delete aircraft graphics
-          deletedModels.push({
-            objectId: i,
-          })
-          if (this.showPaths) {
-            deletedPaths.push({
-              objectId: i,
+          updatedModels.push(
+            new Graphic({
+              attributes: {
+                OBJECTID: i,
+                added: 0,
+              },
             })
+          )
+
+          if (this.showPaths) {
+            updatedPaths.push(
+              new Graphic({
+                attributes: {
+                  OBJECTID: i,
+                  added: 0,
+                },
+              })
+            )
           }
           aircraft.added = false
         }
@@ -275,7 +345,7 @@ export default class PlaneLayer {
           hasZ: true,
         }),
         attributes: {
-          objectID: i,
+          OBJECTID: i,
           aircraftID: aircraft.id,
           heading: 0,
           timestamp: current.timestamp,
@@ -284,6 +354,7 @@ export default class PlaneLayer {
           alt: current.alt,
         },
       })
+
       // Path graphic
       let pathGraphic: Graphic
       if (this.showPaths) {
@@ -305,37 +376,32 @@ export default class PlaneLayer {
         pathGraphic = new Graphic({
           geometry: polyline,
           attributes: {
-            objectID: i,
+            OBJECTID: i,
           },
         })
       }
 
       if (!aircraft.added) {
-        // Add aircraft graphics
-        addedModels.push(modelGraphic)
+        modelGraphic.attributes.added = 1
         if (this.showPaths) {
-          addedPaths.push(pathGraphic!)
+          pathGraphic!.attributes.added = 1
         }
         aircraft.added = true
-      } else {
-        // Update aircraft graphics
-        updatedModels.push(modelGraphic)
-        if (this.showPaths) {
-          updatedPaths.push(pathGraphic!)
-        }
+      }
+
+      // Add aircraft graphics
+      updatedModels.push(modelGraphic)
+      if (this.showPaths) {
+        updatedPaths.push(pathGraphic!)
       }
     }
 
     this.modelLayer.applyEdits({
-      addFeatures: addedModels,
-      deleteFeatures: deletedModels,
       updateFeatures: updatedModels,
     })
 
     if (this.showPaths) {
       this.pathLayer.applyEdits({
-        addFeatures: addedPaths,
-        deleteFeatures: deletedPaths,
         updateFeatures: updatedPaths,
       })
     }

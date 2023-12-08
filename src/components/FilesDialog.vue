@@ -9,6 +9,7 @@ import Papa from "papaparse"
 
 import { QTable, QTableProps } from "quasar"
 import DataRecord048 from "src/asterix/cat048/record"
+import { A } from "app/dist/electron/UnPackaged/assets/index.4b8dfcc6"
 
 const fileStore = useFileStore()
 
@@ -167,6 +168,30 @@ async function onRequest(props: Parameters<NonNullable<QTableProps["onRequest"]>
   loading.value = false
 }
 
+async function exportCSV() {
+  if (fileStore.selectedFile === null) return
+
+  fetch(`http://localhost:5757/csv/${fileStore.selectedFile.filename}`, {
+    method: "POST"
+  }).then(response => {
+    if (!response.ok) {
+      console.error("Error exporting csv")
+    }
+  })
+}
+
+async function exportKML() {
+  if (fileStore.selectedFile === null) return
+
+  fetch(`http://localhost:5757/kml/${fileStore.selectedFile.filename}`, {
+    method: "POST"
+  }).then(response => {
+    if (!response.ok) {
+      console.error("Error exporting kml")
+    }
+  })
+}
+
 onMounted(() => {
   fileStore.getFiles()
 })
@@ -203,7 +228,8 @@ onMounted(() => {
               multiple
               @change="addFiles"
             />
-            <q-btn round icon="download" size="sm"/>
+            <q-btn round icon="list" @click="exportCSV" size="sm"/>
+            <q-btn round icon="terrain" @click="exportKML" size="sm"/>
             <q-btn round :disable="buttonsDisabled" icon="delete" size="sm" @click="removeFiles" />
           </div>
           <q-btn @click="viewTable">View table</q-btn>
