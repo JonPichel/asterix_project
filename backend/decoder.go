@@ -44,7 +44,7 @@ func DecodeFile(buf []byte) []DataRecord048 {
 
 		i += len
 	}
-	//records = recordsFilter(records)
+	records = recordsFilter(records)
 
 	return records
 }

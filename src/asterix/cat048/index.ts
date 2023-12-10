@@ -79,7 +79,6 @@ const Category048: AsterixCategory = {
       },
       { name: "Rho", label: "Rho", field: "Rho" },
       { name: "Theta", label: "Theta", field: "Theta" },
-      { name: "Theta", label: "Theta", field: "Theta" },
       {
         name: "Mode3AValidated",
         label: "Mode3AValidated",

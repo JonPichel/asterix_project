@@ -95,6 +95,7 @@ type DataRecord048 struct {
 	CalculatedHeading float32
 	//I048/170
 	Has170 bool
+	Has170170 bool
 	TargetStatusCNF bool
 	TargetStatusRAD uint8
 	TargetStatusDOU bool
@@ -313,19 +314,19 @@ func (r *DataRecord048) parse130(buf []byte) (int, error) {
 	for _, SFN := range resultFX.positions {
 		switch (SFN) {
 		case 1:
-			r.RadarPlotSRL = (float32(buf[fieldStart]) * 360) / 8192
+			r.RadarPlotSRL = (float32(twosComplement(uint64(buf[fieldStart]),8)) * 360) / 8192
 		case 2:
-			r.RadarPlotSRR = float32(buf[fieldStart])
+			r.RadarPlotSRR = float32(twosComplement(uint64(buf[fieldStart]),8))
 		case 3:
 			r.RadarPlotSAM = float32(twosComplement(uint64(buf[fieldStart]), 8))
 		case 4:
-			r.RadarPlotPRL = float32((float32(buf[fieldStart]) * 360) / 8192)
+			r.RadarPlotPRL = float32((float32(twosComplement(uint64(buf[fieldStart]),8)) * 360) / 8192)
 		case 5:
 			r.RadarPlotPAM = float32(twosComplement(uint64(buf[fieldStart]), 8))
 		case 6:
-			r.RadarPlotRPD = float32(buf[fieldStart]) / 256
+			r.RadarPlotRPD = float32(twosComplement(uint64(buf[fieldStart]),8)) / 256
 		case 7:
-			r.RadarPlotAPD = (float32(buf[fieldStart]) * 360) / 16384
+			r.RadarPlotAPD = (float32(twosComplement(uint64(buf[fieldStart]),8)) * 360) / 16384
 		default:
 			return 0, errors.New("malformed category 48 data record")
 		}
@@ -525,12 +526,13 @@ func (r *DataRecord048) parse170(buf []byte) (int, error) {
 
 
 	r.TargetStatusCNF = (buf[0] >> 7) & 0b1 == 1
-	r.TargetStatusRAD = (buf[0] >> 6) & 0b11
+	r.TargetStatusRAD = (buf[0] >> 5) & 0b11
 	r.TargetStatusDOU = (buf[0] >> 4) & 0b1 == 1
 	r.TargetStatusMAH = (buf[0] >> 3) & 0b1 == 1
 	r.TargetStatusCDM = (buf[0] >> 1) & 0b11
 
 	if resultFX.fieldLen > 1 {
+		r.Has170170 = true
 		r.TargetStatusTRE = (buf[1] >> 7) & 0b1 == 1
 		r.TargetStatusGHO = (buf[1] >> 6) & 0b1 == 1
 		r.TargetStatusSUP = (buf[1] >> 5) & 0b1 == 1

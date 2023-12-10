@@ -170,8 +170,8 @@ func writeCSV(w io.Writer, records []DataRecord048) error {
 		}
 
 		if r.Has040 {
-			row[17] = strconv.FormatFloat(float64(r.Rho), 'f', 2, 32)
-			row[18] = strconv.FormatFloat(float64(r.Theta), 'f', 2, 32)
+			row[17] = strconv.FormatFloat(float64(r.Rho), 'f', 4, 32)
+			row[18] = strconv.FormatFloat(float64(r.Theta), 'f', 4, 32)
 		}
 
 		if r.Has070 {
@@ -200,25 +200,25 @@ func writeCSV(w io.Writer, records []DataRecord048) error {
 
 		if r.Has130 {
 			if r.RadarPlotFields & (1 << 0) != 0 {
-				row[26] = strconv.FormatFloat(float64(r.RadarPlotSRL), 'f', 2, 32)
+				row[26] = strconv.FormatFloat(float64(r.RadarPlotSRL), 'f', 3, 32)
 			}
 			if r.RadarPlotFields & (1 << 1) != 0 {
-				row[27] = strconv.FormatFloat(float64(r.RadarPlotSRR), 'f', 2, 32)
+				row[27] = strconv.FormatFloat(float64(r.RadarPlotSRR), 'f', 3, 32)
 			}
 			if r.RadarPlotFields & (1 << 2) != 0 {
 				row[28] = fmt.Sprintf("%.2f dBm", r.RadarPlotSAM)
 			}
 			if r.RadarPlotFields & (1 << 3) != 0 {
-				row[29] = strconv.FormatFloat(float64(r.RadarPlotPRL), 'f', 2, 32)
+				row[29] = strconv.FormatFloat(float64(r.RadarPlotPRL), 'f', 3, 32)
 			}
 			if r.RadarPlotFields & (1 << 4) != 0 {
 				row[30] = fmt.Sprintf("%.2f dBm", r.RadarPlotPAM)
 			}
 			if r.RadarPlotFields & (1 << 5) != 0 {
-				row[31] = fmt.Sprintf("%.2f dBm", r.RadarPlotRPD)
+				row[31] = fmt.Sprintf("%.3f dBm", r.RadarPlotRPD)
 			}
 			if r.RadarPlotFields & (1 << 6) != 0 {
-				row[32] = fmt.Sprintf("%.2f dBm", r.RadarPlotAPD)
+				row[32] = fmt.Sprintf("%.3f dBm", r.RadarPlotAPD)
 			}
 		}
 
@@ -250,10 +250,10 @@ func writeCSV(w io.Writer, records []DataRecord048) error {
 			}
 			// BDS5.0
 			if r.BDSFields & (1 << 5) != 0 {
-				row[41] = strconv.FormatFloat(float64(r.Roll), 'f', 2, 32)
+				row[41] = strconv.FormatFloat(float64(r.Roll), 'f', 3, 32)
 			}
 			if r.BDSFields & (1 << 6) != 0 {
-				row[42] = strconv.FormatFloat(float64(r.TrueTrack), 'f', 2, 32)
+				row[42] = strconv.FormatFloat(float64(r.TrueTrack), 'f', 3, 32)
 			}
 			if r.BDSFields & (1 << 7) != 0 {
 				row[43] = strconv.FormatFloat(float64(r.GroundSpeed), 'f', 2, 32)
@@ -266,13 +266,13 @@ func writeCSV(w io.Writer, records []DataRecord048) error {
 			}
 			// BDS6.0
 			if r.BDSFields & (1 << 10) != 0 {
-				row[46] = strconv.FormatFloat(float64(r.MagneticHeading), 'f', 2, 32)
+				row[46] = strconv.FormatFloat(float64(r.MagneticHeading), 'f', 3, 32)
 			}
 			if r.BDSFields & (1 << 11) != 0 {
 				row[47] = strconv.FormatFloat(float64(r.IAS), 'f', 2, 32)
 			}
 			if r.BDSFields & (1 << 12) != 0 {
-				row[48] = strconv.FormatFloat(float64(r.MACH), 'f', 2, 32)
+				row[48] = strconv.FormatFloat(float64(r.MACH), 'f', 3, 32)
 			}
 			if r.BDSFields & (1 << 13) != 0 {
 				row[49] = strconv.FormatFloat(float64(r.BarometricAltitudeRate), 'f', 2, 32)
@@ -293,7 +293,7 @@ func writeCSV(w io.Writer, records []DataRecord048) error {
 
 		if r.Has200 {
 			row[54] = strconv.FormatFloat(float64(r.CalculatedGroundSpeed), 'f', 2, 32)
-			row[55] = strconv.FormatFloat(float64(r.CalculatedHeading), 'f', 2, 32)
+			row[55] = strconv.FormatFloat(float64(r.CalculatedHeading), 'f', 4, 32)
 		}
 
 		if r.Has170 {
@@ -302,6 +302,9 @@ func writeCSV(w io.Writer, records []DataRecord048) error {
 			row[58] = r.TargetStatusDOUStr()
 			row[59] = YesNoStr(r.TargetStatusMAH)
 			row[60] = r.TargetStatusCDMStr()
+		}
+
+		if r.Has170170{
 			row[61] = r.TargetStatusTREStr()
 			row[62] = r.TargetStatusGHOStr()
 			row[63] = YesNoStr(r.TargetStatusSUP)
