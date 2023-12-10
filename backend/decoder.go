@@ -25,24 +25,24 @@ func DecodeFile(buf []byte) []DataRecord048 {
 	records := make([]DataRecord048, 0)
 	stop := false
 	for i := 0; i < len(buf) && !stop; {
-		cat := buf[i]
-		len := (int(buf[i + 1]) << 8) | int(buf[i + 2])
-		data := buf[i + 3:i + len]
+		CAT := buf[i]
+		LEN := (int(buf[i + 1]) << 8) | int(buf[i + 2])
+		data := buf[i + 3:i + LEN]
 
-		switch cat {
+		switch CAT {
 		case 48:
-			r, err := New048(data)
+			r, err := New048(len(records), data)
 			if err != nil {
 				continue
 			}
 
 			records = append(records, r)
 		default:
-			log.Printf("Data Record Category not implemented: %d", cat)
+			log.Printf("Data Record Category not implemented: %d", CAT)
 			stop = true
 		}
 
-		i += len
+		i += LEN
 	}
 	records = recordsFilter(records)
 

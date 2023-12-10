@@ -27,12 +27,3 @@
  *   }
  * }
  */
-
-import { ipcRenderer } from "electron"
-
-const { contextBridge } = require("electron")
-
-contextBridge.exposeInMainWorld("decoderAPI", {
-  sendFiles: (files: File[]) => ipcRenderer.send("message", files),
-  receiveFilesCallback: (callback: any) => ipcRenderer.on("message", callback),
-})

@@ -11,8 +11,8 @@ import { RADAR_BCN } from "./locations"
 // Load style
 import "@arcgis/core/assets/esri/themes/dark/main.css"
 
-import { DataRecord } from "src/asterix"
 import PlaneLayer, { Aircraft } from "./PlaneLayer"
+import TimeExtent from "@arcgis/core/TimeExtent"
 
 export const SPATIAL_REFERENCE = new SpatialReference({
   wkid: 102100,
@@ -22,7 +22,8 @@ export class ArcgisMap {
   map: EsriMap
   view: SceneView
   planeLayer: PlaneLayer
-  timeSlider: TimeSlider | null
+  timeSlider: TimeSlider
+  timeSliderWatchHandle: __esri.WatchHandle | null
 
   constructor(container: string) {
     this.map = new EsriMap({
@@ -44,7 +45,21 @@ export class ArcgisMap {
     })
     this.view.ui.add(track, "top-left")
 
-    this.timeSlider = null
+    //this.timeSlider = null
+    this.timeSlider = new TimeSlider({
+      container: "sliderDiv",
+      mode: "instant",
+      timeVisible: true,
+      stops: {
+        interval: new TimeInterval({
+          value: 10,
+          unit: "seconds",
+        }),
+      },
+      playRate: 1000,
+    })
+    this.view.ui.add(this.timeSlider, "manual")
+    this.timeSliderWatchHandle = null
   }
 
   addLayer(layer: Layer) {
@@ -52,45 +67,44 @@ export class ArcgisMap {
   }
 
   async addAircrafts(aircrafts: Aircraft[]) {
-    if (this.timeSlider !== null) {
-      this.timeSlider.stop()
-    } else {
-      this.timeSlider = new TimeSlider({
-        container: "sliderDiv",
-        mode: "instant",
-        timeVisible: true,
-        stops: {
-          interval: new TimeInterval({
-            value: 10,
-            unit: "seconds",
-          }),
-        },
-        playRate: 1000,
-      })
-      this.view.ui.add(this.timeSlider, "manual")
-      this.timeSlider.watch("timeExtent", () => {
-        requestAnimationFrame(() =>
-          this.planeLayer.update(this.timeSlider!.timeExtent.start.getTime())
-        )
-      })
-    }
+    this.timeSlider.stop()
+    this.timeSliderWatchHandle = this.timeSlider.watch("timeExtent", () => {
+      requestAnimationFrame(() =>
+        this.planeLayer.update(this.timeSlider!.timeExtent.start.getTime())
+      )
+    })
 
     const timeExtent = this.planeLayer.loadData(aircrafts)
     this.timeSlider.fullTimeExtent = timeExtent
+    this.timeSlider.timeExtent = new TimeExtent({
+      start: timeExtent.start,
+    })
+  }
+
+  clear() {
+    if (this.timeSlider !== null) {
+      this.timeSlider.stop()
+      this.timeSliderWatchHandle?.remove()
+    }
+    this.planeLayer.clear()
   }
 
   destroy() {
     this.view.destroy()
   }
 
-  setSpeed(speedFactor: number){
-    if(this.timeSlider !== null){
-      this.timeSlider.stops={
+  setSpeed(speedFactor: number) {
+    if (this.timeSlider !== null) {
+      this.timeSlider.stops = {
         interval: new TimeInterval({
           value: 10 * speedFactor,
           unit: "seconds",
-        })
+        }),
       }
     }
+  }
+
+  togglePath() {
+    this.planeLayer.togglePaths()
   }
 }

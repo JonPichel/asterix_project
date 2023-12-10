@@ -9,6 +9,7 @@ const map = ref<InstanceType<typeof ArcgisMap> | null>(null)
 const filesDialog = ref(true)
 
 function plotToMap() {
+  map.value?.clear()
   fetch("http://localhost:5757/simData", {
     method: "GET"
   }).then(response => {
@@ -23,13 +24,36 @@ function plotToMap() {
     console.error("Adding sim data:", error)
   })
 }
+
+function showDialog() {
+  filesDialog.value = true
+}
 </script>
 
 <template>
-  <q-page>
-    <ArcgisMap ref="map"></ArcgisMap>
-    <FilesDialog :visible="filesDialog" @load-to-map="plotToMap"></FilesDialog>
-  </q-page>
+  <q-layout view="lHh Lpr lFf">
+    <q-header elevated>
+      <q-toolbar>
+
+        <q-toolbar-title>
+          Asterix Project
+        </q-toolbar-title>
+
+        <q-btn flat round dense icon="folder" class="q-mr-xs" @click="showDialog"/>
+
+        <div>Quasar v{{ $q.version }}</div>
+      </q-toolbar>
+    </q-header>
+
+    <q-page-container>
+      <q-page>
+        <ArcgisMap ref="map"></ArcgisMap>
+        <q-dialog v-model="filesDialog">
+          <FilesDialog @load-to-map="plotToMap"></FilesDialog>
+        </q-dialog>
+      </q-page>
+    </q-page-container>
+  </q-layout>
 </template>
 
 <style scoped>

@@ -52,9 +52,7 @@ function getVisibleRoute(route: RoutePoint[], timestamp: number) {
   let low = 0
   let high = route.length - 1
   let index = 0
-  let j = 0
   while (low <= high) {
-    j++
     const mid = Math.floor((low + high) / 2)
     if (route[mid].timestamp <= timestamp) {
       index = mid
@@ -73,23 +71,41 @@ export default class PlaneLayer {
   aircrafts: Aircraft[] = []
   aircraftIndex: Map<string, number> = new Map()
 
-  modelLayer!: FeatureLayer
-  pathLayer!: FeatureLayer
+  modelLayer: FeatureLayer | null = null
+  pathLayer: FeatureLayer | null = null
 
   showPaths = false
+  hidePaths = false
 
   constructor(map: ArcgisMap) {
     this.map = map
 
-    this.initModels()
-    this.initPaths()
+    //this.initModels()
+    //this.initPaths()
   }
 
   togglePaths() {
     this.showPaths = !this.showPaths
+    if (!this.showPaths) {
+      this.hidePaths = true
+    }
+  }
+
+  clear() {
+    this.modelLayer?.destroy()
+    this.modelLayer = null
+    this.pathLayer?.destroy()
+    this.pathLayer = null
   }
 
   loadData(aircrafts: Aircraft[]): TimeExtent {
+    if (this.modelLayer === null) {
+      this.initModels()
+    }
+    if (this.pathLayer === null) {
+      this.initPaths()
+    }
+
     this.aircrafts = aircrafts
 
     let start = this.aircrafts[0].route[0].timestamp
@@ -161,10 +177,10 @@ export default class PlaneLayer {
       addedPaths.push(pathGraphic)
     }
 
-    this.modelLayer.applyEdits({
+    this.modelLayer!.applyEdits({
       addFeatures: addedModels,
     })
-    this.pathLayer.applyEdits({
+    this.pathLayer!.applyEdits({
       addFeatures: addedPaths,
     })
 
@@ -302,11 +318,24 @@ export default class PlaneLayer {
   }
 
   update(timestamp: number) {
+    if (this.modelLayer === null || this.pathLayer === null) return
+
     const updatedModels: Graphic[] = []
     const updatedPaths: Graphic[] = []
     for (let i = 0; i < this.aircrafts.length; i++) {
       const aircraft = this.aircrafts[i]
       const visible = getVisibleRoute(aircraft.route, timestamp)
+
+      if (this.hidePaths && !this.showPaths) {
+        updatedPaths.push(
+          new Graphic({
+            attributes: {
+              OBJECTID: i,
+              added: 0,
+            },
+          })
+        )
+      }
 
       if (!visible.length) {
         if (aircraft.added) {
@@ -351,6 +380,7 @@ export default class PlaneLayer {
           lat: current.lat,
           lon: current.lon,
           alt: current.alt,
+          added: 1,
         },
       })
 
@@ -376,16 +406,9 @@ export default class PlaneLayer {
           geometry: polyline,
           attributes: {
             OBJECTID: i,
+            added: 1,
           },
         })
-      }
-
-      if (!aircraft.added) {
-        modelGraphic.attributes.added = 1
-        if (this.showPaths) {
-          pathGraphic!.attributes.added = 1
-        }
-        aircraft.added = true
       }
 
       // Add aircraft graphics
@@ -395,14 +418,15 @@ export default class PlaneLayer {
       }
     }
 
-    this.modelLayer.applyEdits({
+    this.modelLayer!.applyEdits({
       updateFeatures: updatedModels,
     })
 
-    if (this.showPaths) {
-      this.pathLayer.applyEdits({
+    if (this.showPaths || this.hidePaths) {
+      this.pathLayer!.applyEdits({
         updateFeatures: updatedPaths,
       })
+      this.hidePaths = false
     }
   }
 }

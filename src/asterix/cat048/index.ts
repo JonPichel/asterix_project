@@ -113,8 +113,14 @@ const Category048: AsterixCategory = {
         name: "AircraftAddress",
         label: "AircraftAddress",
         field: "AircraftAddress",
+        sortable: true,
       },
-      { name: "AircraftID", label: "AircraftID", field: "AircraftID" },
+      {
+        name: "AircraftID",
+        label: "AircraftID",
+        field: "AircraftID",
+        sortable: true,
+      },
       { name: "BDS", label: "BDS", field: "BDS" },
       {
         name: "MCPFCUSelectedAltitude",

@@ -7,6 +7,7 @@ import (
 )
 
 type DataRecord048 struct {
+	Id int
 	// For visualization
 	HasCoords bool
 	Coords GPSCoords
@@ -122,11 +123,11 @@ type DataRecord048 struct {
 
 var lastRadar *Radar
 
-func New048(buf []byte) (DataRecord048, error) {
+func New048(id int, buf []byte) (DataRecord048, error) {
 	resultFX := checkFX(buf)
 	dataFieldsBuf := buf[resultFX.fieldLen:]
 
-	r := DataRecord048{}
+	r := DataRecord048{Id: id}
 
 	fieldStart := 0
 	for _, FRN := range resultFX.positions {
