@@ -194,7 +194,7 @@ func writeCSV(w io.Writer, records []DataRecord048) error {
 			row[24] = strconv.FormatFloat(float64(r.FlightLevel), 'f', 2, 32)
 
 			if r.IsFLCorrected {
-				row[25] = strconv.FormatFloat(float64(r.FlightLevelCorrected), 'f', 2, 32)
+				row[25] = strconv.FormatFloat(float64(r.FlightLevelCorrected), 'f', 4, 32)
 			}
 		}
 

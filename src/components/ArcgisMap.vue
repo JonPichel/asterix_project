@@ -79,6 +79,10 @@ function convertirKML() {
   <div id="viewDiv"></div>
   <div id="sliderDiv">
     <!--<q-btn round icon="download" size="sm" @click="convertirKML" />-->
+    <q-btn label="X1" size="sm" @click="map.setSpeed(1)" />
+    <q-btn label="X2" size="sm" @click="map.setSpeed(2)" />
+    <q-btn label="X4" size="sm" @click="map.setSpeed(4)" />
+    <q-btn label="X6" size="sm" @click="map.setSpeed(6)" />
   </div>
 </template>
 

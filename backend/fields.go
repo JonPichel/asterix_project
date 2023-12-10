@@ -163,7 +163,7 @@ func (r DataRecord048) TargetStatusRADStr() string {
 	case 0:
 		return "Combined"
 	case 1:
-		return "PSSR"
+		return "PSR"
 	case 2:
 		return "SSR/Mode S"
 	case 3:

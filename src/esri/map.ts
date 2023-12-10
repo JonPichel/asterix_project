@@ -82,4 +82,15 @@ export class ArcgisMap {
   destroy() {
     this.view.destroy()
   }
+
+  setSpeed(speedFactor: number){
+    if(this.timeSlider !== null){
+      this.timeSlider.stops={
+        interval: new TimeInterval({
+          value: 10 * speedFactor,
+          unit: "seconds",
+        })
+      }
+    }
+  }
 }

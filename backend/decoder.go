@@ -2,6 +2,25 @@ package main
 
 import "log"
 
+func recordsFilter(records []DataRecord048) []DataRecord048 {
+	var filteredRecords []DataRecord048
+
+	for _, record := range records {
+
+		var add bool = false
+
+		if record.Mode3ACode == 0o7777 || record.TargetReportType == 2 || record.TargetStatusRAD == 1{
+			add = true
+		}
+
+		if add == false {
+			filteredRecords = append(filteredRecords, record)
+		}
+	}
+
+	return filteredRecords
+}
+
 func DecodeFile(buf []byte) []DataRecord048 {
 	records := make([]DataRecord048, 0)
 	stop := false
@@ -25,6 +44,7 @@ func DecodeFile(buf []byte) []DataRecord048 {
 
 		i += len
 	}
+	//records = recordsFilter(records)
 
 	return records
 }
