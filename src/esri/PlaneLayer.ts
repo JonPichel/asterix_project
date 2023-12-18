@@ -338,8 +338,17 @@ export default class PlaneLayer {
       }
 
       if (!visible.length) {
-        if (aircraft.added) {
-          updatedModels.push(
+        updatedModels.push(
+          new Graphic({
+            attributes: {
+              OBJECTID: i,
+              added: 0,
+            },
+          })
+        )
+
+        if (this.showPaths) {
+          updatedPaths.push(
             new Graphic({
               attributes: {
                 OBJECTID: i,
@@ -347,19 +356,8 @@ export default class PlaneLayer {
               },
             })
           )
-
-          if (this.showPaths) {
-            updatedPaths.push(
-              new Graphic({
-                attributes: {
-                  OBJECTID: i,
-                  added: 0,
-                },
-              })
-            )
-          }
-          aircraft.added = false
         }
+        aircraft.added = false
         continue
       }
 
